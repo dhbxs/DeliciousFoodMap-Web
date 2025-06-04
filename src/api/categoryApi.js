@@ -10,7 +10,7 @@ import request from '@/utils/request'
  */
 export function getCategoryData(params = {}) {
     return request({
-        method: 'GET',
+        method: 'POST',
         url: '/category/get-all',
         params: params
     })
