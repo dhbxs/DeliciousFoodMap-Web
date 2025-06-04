@@ -20,7 +20,6 @@
         </el-button>
       </div>
     </div>
-
     <div class="category-list">
       <div
         v-for="category in categories"
@@ -54,9 +53,10 @@
 </template>
 
 <script>
-import { computed } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { Setting } from "@element-plus/icons-vue";
+import { getCategoryData } from "@/api/categoryApi";
 
 export default {
   name: "CategoryFilter",
@@ -66,11 +66,16 @@ export default {
 
   setup() {
     const store = useStore();
-
-    // 计算属性
-    const categories = computed(
-      () => store.getters["categories/allCategories"]
-    );
+    const categories = ref([]);
+    
+    onMounted(async () => {
+      try {
+        const response = await getCategoryData();
+        categories.value = response.data;
+      } catch (error) {
+        ElMessage.error('获取分类列表失败');
+      }
+    });
     const selectedCategories = computed(
       () => store.state.shops.filteredCategories
     );
@@ -160,6 +165,9 @@ export default {
 }
 
 .category-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   max-height: 300px;
   overflow-y: auto;
 }

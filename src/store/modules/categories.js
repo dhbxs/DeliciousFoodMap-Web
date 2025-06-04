@@ -4,16 +4,16 @@ export default {
 
   state: {
     categories: [
-      { id: 1, name: "烧烤", color: "#ff6b6b", icon: "🍖" },
-      { id: 2, name: "火锅", color: "#ff8787", icon: "🍲" },
-      { id: 3, name: "小吃", color: "#ffa8a8", icon: "🍡" },
-      { id: 4, name: "甜品", color: "#ffc9c9", icon: "🍰" },
-      { id: 5, name: "面食", color: "#ffe0e0", icon: "🍜" },
-      { id: 6, name: "川菜", color: "#ff5722", icon: "🌶️" },
-      { id: 7, name: "粤菜", color: "#4caf50", icon: "🥘" },
-      { id: 8, name: "日料", color: "#2196f3", icon: "🍣" },
-      { id: 9, name: "西餐", color: "#9c27b0", icon: "🍝" },
-      { id: 10, name: "咖啡", color: "#795548", icon: "☕" },
+      // { id: 1, name: "烧烤", color: "#ff6b6b", icon: "🍖" },
+      // { id: 2, name: "火锅", color: "#ff8787", icon: "🍲" },
+      // { id: 3, name: "小吃", color: "#ffa8a8", icon: "🍡" },
+      // { id: 4, name: "甜品", color: "#ffc9c9", icon: "🍰" },
+      // { id: 5, name: "面食", color: "#ffe0e0", icon: "🍜" },
+      // { id: 6, name: "川菜", color: "#ff5722", icon: "🌶️" },
+      // { id: 7, name: "粤菜", color: "#4caf50", icon: "🥘" },
+      // { id: 8, name: "日料", color: "#2196f3", icon: "🍣" },
+      // { id: 9, name: "西餐", color: "#9c27b0", icon: "🍝" },
+      // { id: 10, name: "咖啡", color: "#795548", icon: "☕" },
     ],
   },
 

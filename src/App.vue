@@ -11,6 +11,13 @@
   box-sizing: border-box;
 }
 
+.icon {
+       width: 1em; height: 1em;
+       vertical-align: -0.15em;
+       fill: currentColor;
+       overflow: hidden;
+}
+
 #app {
   font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", "微软雅黑", Arial, sans-serif;

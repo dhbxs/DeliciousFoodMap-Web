@@ -1,21 +1,39 @@
 <!DOCTYPE html>
 <html lang="">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <script src="./iconfont/iconfont.js"></script>
+    <!-- <link rel="stylesheet" href="/public/iconfont/iconfont.css"> -->
     <!-- 高德地图API -->
     <!-- 请将YOUR_AMAP_KEY替换为您的高德地图API密钥 -->
     <!-- 申请地址：https://console.amap.com/dev/key/app -->
-    <script type="text/javascript" src="https://webapi.amap.com/maps?v=2.0&key=<%= process.env.VUE_APP_AMAP_KEY %>&plugin=AMap.Scale,AMap.ToolBar,AMap.ControlBar,AMap.Geolocation"></script>
+    <script
+      type="text/javascript"
+      src="https://webapi.amap.com/maps?v=2.0&key=<%= process.env.VUE_APP_AMAP_KEY %>&plugin=AMap.Scale,AMap.ToolBar,AMap.ControlBar,AMap.Geolocation"
+    ></script>
   </head>
   <body>
     <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+      <strong
+        >We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work
+        properly without JavaScript enabled. Please enable it to
+        continue.</strong
+      >
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>
+  <style>
+    .icon {
+      width: 1em;
+      height: 1em;
+      vertical-align: -0.15em;
+      fill: currentColor;
+      overflow: hidden;
+    }
+  </style>
 </html>

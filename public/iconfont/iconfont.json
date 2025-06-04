@@ -1,0 +1,359 @@
+{
+  "id": "4939965",
+  "name": "food",
+  "font_family": "iconfont",
+  "css_prefix_text": "food-icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "44383899",
+      "name": "001-drink",
+      "font_class": "a-001-drink",
+      "unicode": "e77f",
+      "unicode_decimal": 59263
+    },
+    {
+      "icon_id": "44383900",
+      "name": "011-food",
+      "font_class": "a-011-food",
+      "unicode": "e780",
+      "unicode_decimal": 59264
+    },
+    {
+      "icon_id": "44383901",
+      "name": "005-snack",
+      "font_class": "a-005-snack",
+      "unicode": "e781",
+      "unicode_decimal": 59265
+    },
+    {
+      "icon_id": "44383902",
+      "name": "003-food",
+      "font_class": "a-003-food",
+      "unicode": "e782",
+      "unicode_decimal": 59266
+    },
+    {
+      "icon_id": "44383903",
+      "name": "009-snack",
+      "font_class": "a-009-snack",
+      "unicode": "e783",
+      "unicode_decimal": 59267
+    },
+    {
+      "icon_id": "44383904",
+      "name": "002-food",
+      "font_class": "a-002-food",
+      "unicode": "e784",
+      "unicode_decimal": 59268
+    },
+    {
+      "icon_id": "44383905",
+      "name": "013-food",
+      "font_class": "a-013-food",
+      "unicode": "e785",
+      "unicode_decimal": 59269
+    },
+    {
+      "icon_id": "44383906",
+      "name": "019-food",
+      "font_class": "a-019-food",
+      "unicode": "e786",
+      "unicode_decimal": 59270
+    },
+    {
+      "icon_id": "44383907",
+      "name": "007-food",
+      "font_class": "a-007-food",
+      "unicode": "e787",
+      "unicode_decimal": 59271
+    },
+    {
+      "icon_id": "44383908",
+      "name": "012-bread",
+      "font_class": "a-012-bread",
+      "unicode": "e788",
+      "unicode_decimal": 59272
+    },
+    {
+      "icon_id": "44383909",
+      "name": "004-meat",
+      "font_class": "a-004-meat",
+      "unicode": "e789",
+      "unicode_decimal": 59273
+    },
+    {
+      "icon_id": "44383910",
+      "name": "017-strawberry",
+      "font_class": "a-017-strawberry",
+      "unicode": "e78a",
+      "unicode_decimal": 59274
+    },
+    {
+      "icon_id": "44383911",
+      "name": "006-strawberry",
+      "font_class": "a-006-strawberry",
+      "unicode": "e78b",
+      "unicode_decimal": 59275
+    },
+    {
+      "icon_id": "44383912",
+      "name": "020-cheese",
+      "font_class": "a-020-cheese",
+      "unicode": "e78c",
+      "unicode_decimal": 59276
+    },
+    {
+      "icon_id": "44383913",
+      "name": "015-food",
+      "font_class": "a-015-food",
+      "unicode": "e78d",
+      "unicode_decimal": 59277
+    },
+    {
+      "icon_id": "44383914",
+      "name": "018-strawberry",
+      "font_class": "a-018-strawberry",
+      "unicode": "e78e",
+      "unicode_decimal": 59278
+    },
+    {
+      "icon_id": "44383915",
+      "name": "010-food",
+      "font_class": "a-010-food",
+      "unicode": "e78f",
+      "unicode_decimal": 59279
+    },
+    {
+      "icon_id": "44383916",
+      "name": "014-food",
+      "font_class": "a-014-food",
+      "unicode": "e790",
+      "unicode_decimal": 59280
+    },
+    {
+      "icon_id": "44383917",
+      "name": "016-breakfast",
+      "font_class": "a-016-breakfast",
+      "unicode": "e791",
+      "unicode_decimal": 59281
+    },
+    {
+      "icon_id": "44383918",
+      "name": "漂亮食物",
+      "font_class": "a-008-food",
+      "unicode": "e792",
+      "unicode_decimal": 59282
+    },
+    {
+      "icon_id": "44392793",
+      "name": "001-sweet",
+      "font_class": "a-001-sweet",
+      "unicode": "e793",
+      "unicode_decimal": 59283
+    },
+    {
+      "icon_id": "44392794",
+      "name": "003-whiskey",
+      "font_class": "a-003-whiskey",
+      "unicode": "e794",
+      "unicode_decimal": 59284
+    },
+    {
+      "icon_id": "44392795",
+      "name": "008-drink",
+      "font_class": "a-008-drink",
+      "unicode": "e795",
+      "unicode_decimal": 59285
+    },
+    {
+      "icon_id": "44392796",
+      "name": "002-drink",
+      "font_class": "a-002-drink",
+      "unicode": "e796",
+      "unicode_decimal": 59286
+    },
+    {
+      "icon_id": "44392797",
+      "name": "009-sweet",
+      "font_class": "a-009-sweet",
+      "unicode": "e797",
+      "unicode_decimal": 59287
+    },
+    {
+      "icon_id": "44392798",
+      "name": "006-drink",
+      "font_class": "a-006-drink",
+      "unicode": "e798",
+      "unicode_decimal": 59288
+    },
+    {
+      "icon_id": "44392799",
+      "name": "007-strawberry",
+      "font_class": "a-007-strawberry",
+      "unicode": "e799",
+      "unicode_decimal": 59289
+    },
+    {
+      "icon_id": "44392800",
+      "name": "004-cup",
+      "font_class": "a-004-cup",
+      "unicode": "e79a",
+      "unicode_decimal": 59290
+    },
+    {
+      "icon_id": "44392801",
+      "name": "022-glass",
+      "font_class": "a-022-glass",
+      "unicode": "e79b",
+      "unicode_decimal": 59291
+    },
+    {
+      "icon_id": "44392802",
+      "name": "015-drink",
+      "font_class": "a-015-drink",
+      "unicode": "e79c",
+      "unicode_decimal": 59292
+    },
+    {
+      "icon_id": "44392803",
+      "name": "013-drink",
+      "font_class": "a-013-drink",
+      "unicode": "e79d",
+      "unicode_decimal": 59293
+    },
+    {
+      "icon_id": "44392804",
+      "name": "025-drink",
+      "font_class": "a-025-drink",
+      "unicode": "e79e",
+      "unicode_decimal": 59294
+    },
+    {
+      "icon_id": "44392805",
+      "name": "017-drink",
+      "font_class": "a-017-drink",
+      "unicode": "e79f",
+      "unicode_decimal": 59295
+    },
+    {
+      "icon_id": "44392806",
+      "name": "014-glass",
+      "font_class": "a-014-glass",
+      "unicode": "e7a0",
+      "unicode_decimal": 59296
+    },
+    {
+      "icon_id": "44392807",
+      "name": "019-alcohol",
+      "font_class": "a-019-alcohol",
+      "unicode": "e7a1",
+      "unicode_decimal": 59297
+    },
+    {
+      "icon_id": "44392808",
+      "name": "016-moccha",
+      "font_class": "a-016-moccha",
+      "unicode": "e7a2",
+      "unicode_decimal": 59298
+    },
+    {
+      "icon_id": "44392809",
+      "name": "011-drink",
+      "font_class": "a-011-drink",
+      "unicode": "e7a3",
+      "unicode_decimal": 59299
+    },
+    {
+      "icon_id": "44392810",
+      "name": "020-milk",
+      "font_class": "a-020-milk",
+      "unicode": "e7a4",
+      "unicode_decimal": 59300
+    },
+    {
+      "icon_id": "44392811",
+      "name": "023-drink",
+      "font_class": "a-023-drink",
+      "unicode": "e7a5",
+      "unicode_decimal": 59301
+    },
+    {
+      "icon_id": "44392812",
+      "name": "021-milk",
+      "font_class": "a-021-milk",
+      "unicode": "e7a6",
+      "unicode_decimal": 59302
+    },
+    {
+      "icon_id": "44392813",
+      "name": "027-tropical",
+      "font_class": "a-027-tropical",
+      "unicode": "e7a7",
+      "unicode_decimal": 59303
+    },
+    {
+      "icon_id": "44392814",
+      "name": "029-drink",
+      "font_class": "a-029-drink",
+      "unicode": "e7a8",
+      "unicode_decimal": 59304
+    },
+    {
+      "icon_id": "44392815",
+      "name": "010-fruit",
+      "font_class": "a-010-fruit",
+      "unicode": "e7a9",
+      "unicode_decimal": 59305
+    },
+    {
+      "icon_id": "44392816",
+      "name": "028-healthy",
+      "font_class": "a-028-healthy",
+      "unicode": "e7aa",
+      "unicode_decimal": 59306
+    },
+    {
+      "icon_id": "44392817",
+      "name": "012-drink",
+      "font_class": "a-012-drink",
+      "unicode": "e7ab",
+      "unicode_decimal": 59307
+    },
+    {
+      "icon_id": "44392818",
+      "name": "030-drink",
+      "font_class": "a-030-drink",
+      "unicode": "e7ac",
+      "unicode_decimal": 59308
+    },
+    {
+      "icon_id": "44392819",
+      "name": "005-soft drink can",
+      "font_class": "a-005-softdrinkcan",
+      "unicode": "e7ad",
+      "unicode_decimal": 59309
+    },
+    {
+      "icon_id": "44392820",
+      "name": "018-hot americano",
+      "font_class": "a-018-hotamericano",
+      "unicode": "e7ae",
+      "unicode_decimal": 59310
+    },
+    {
+      "icon_id": "44392821",
+      "name": "026-drink",
+      "font_class": "a-026-drink",
+      "unicode": "e7af",
+      "unicode_decimal": 59311
+    },
+    {
+      "icon_id": "44392822",
+      "name": "缤纷饮料",
+      "font_class": "a-024-drink",
+      "unicode": "e7b0",
+      "unicode_decimal": 59312
+    }
+  ]
+}

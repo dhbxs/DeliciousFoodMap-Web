@@ -132,10 +132,11 @@
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Edit, Delete } from "@element-plus/icons-vue";
+import { getCategoryData } from "../api/categoryApi";
 
 export default {
   name: "CategoryForm",
@@ -175,9 +176,16 @@ export default {
       },
     });
 
-    const categories = computed(
-      () => store.getters["categories/allCategories"]
-    );
+    const categories = ref([]);
+    
+    onMounted(async () => {
+      try {
+        const response = await getCategoryData();
+        categories.value = response.data;
+      } catch (error) {
+        ElMessage.error('获取分类列表失败');
+      }
+    });
     const allShops = computed(() => store.getters["shops/allShops"]);
 
     // 表单验证规则

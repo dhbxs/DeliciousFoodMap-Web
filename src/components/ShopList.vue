@@ -8,7 +8,6 @@
         </el-tag>
       </div>
     </div>
-
     <div class="search-bar">
       <el-input
         v-model="searchKeyword"

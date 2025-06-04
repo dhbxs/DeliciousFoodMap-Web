@@ -1,0 +1,215 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4939965 */
+  src: url('iconfont.woff2?t=1749020183887') format('woff2'),
+       url('iconfont.woff?t=1749020183887') format('woff'),
+       url('iconfont.ttf?t=1749020183887') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.food-icon-a-001-drink:before {
+  content: "\e77f";
+}
+
+.food-icon-a-011-food:before {
+  content: "\e780";
+}
+
+.food-icon-a-005-snack:before {
+  content: "\e781";
+}
+
+.food-icon-a-003-food:before {
+  content: "\e782";
+}
+
+.food-icon-a-009-snack:before {
+  content: "\e783";
+}
+
+.food-icon-a-002-food:before {
+  content: "\e784";
+}
+
+.food-icon-a-013-food:before {
+  content: "\e785";
+}
+
+.food-icon-a-019-food:before {
+  content: "\e786";
+}
+
+.food-icon-a-007-food:before {
+  content: "\e787";
+}
+
+.food-icon-a-012-bread:before {
+  content: "\e788";
+}
+
+.food-icon-a-004-meat:before {
+  content: "\e789";
+}
+
+.food-icon-a-017-strawberry:before {
+  content: "\e78a";
+}
+
+.food-icon-a-006-strawberry:before {
+  content: "\e78b";
+}
+
+.food-icon-a-020-cheese:before {
+  content: "\e78c";
+}
+
+.food-icon-a-015-food:before {
+  content: "\e78d";
+}
+
+.food-icon-a-018-strawberry:before {
+  content: "\e78e";
+}
+
+.food-icon-a-010-food:before {
+  content: "\e78f";
+}
+
+.food-icon-a-014-food:before {
+  content: "\e790";
+}
+
+.food-icon-a-016-breakfast:before {
+  content: "\e791";
+}
+
+.food-icon-a-008-food:before {
+  content: "\e792";
+}
+
+.food-icon-a-001-sweet:before {
+  content: "\e793";
+}
+
+.food-icon-a-003-whiskey:before {
+  content: "\e794";
+}
+
+.food-icon-a-008-drink:before {
+  content: "\e795";
+}
+
+.food-icon-a-002-drink:before {
+  content: "\e796";
+}
+
+.food-icon-a-009-sweet:before {
+  content: "\e797";
+}
+
+.food-icon-a-006-drink:before {
+  content: "\e798";
+}
+
+.food-icon-a-007-strawberry:before {
+  content: "\e799";
+}
+
+.food-icon-a-004-cup:before {
+  content: "\e79a";
+}
+
+.food-icon-a-022-glass:before {
+  content: "\e79b";
+}
+
+.food-icon-a-015-drink:before {
+  content: "\e79c";
+}
+
+.food-icon-a-013-drink:before {
+  content: "\e79d";
+}
+
+.food-icon-a-025-drink:before {
+  content: "\e79e";
+}
+
+.food-icon-a-017-drink:before {
+  content: "\e79f";
+}
+
+.food-icon-a-014-glass:before {
+  content: "\e7a0";
+}
+
+.food-icon-a-019-alcohol:before {
+  content: "\e7a1";
+}
+
+.food-icon-a-016-moccha:before {
+  content: "\e7a2";
+}
+
+.food-icon-a-011-drink:before {
+  content: "\e7a3";
+}
+
+.food-icon-a-020-milk:before {
+  content: "\e7a4";
+}
+
+.food-icon-a-023-drink:before {
+  content: "\e7a5";
+}
+
+.food-icon-a-021-milk:before {
+  content: "\e7a6";
+}
+
+.food-icon-a-027-tropical:before {
+  content: "\e7a7";
+}
+
+.food-icon-a-029-drink:before {
+  content: "\e7a8";
+}
+
+.food-icon-a-010-fruit:before {
+  content: "\e7a9";
+}
+
+.food-icon-a-028-healthy:before {
+  content: "\e7aa";
+}
+
+.food-icon-a-012-drink:before {
+  content: "\e7ab";
+}
+
+.food-icon-a-030-drink:before {
+  content: "\e7ac";
+}
+
+.food-icon-a-005-softdrinkcan:before {
+  content: "\e7ad";
+}
+
+.food-icon-a-018-hotamericano:before {
+  content: "\e7ae";
+}
+
+.food-icon-a-026-drink:before {
+  content: "\e7af";
+}
+
+.food-icon-a-024-drink:before {
+  content: "\e7b0";
+}
+
