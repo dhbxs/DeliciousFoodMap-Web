@@ -25,11 +25,22 @@
           </el-form-item>
           
           <el-form-item prop="icon">
-            <el-input
+            <el-select
               v-model="form.icon"
-              placeholder="图标"
-              style="width: 80px"
-            />
+              placeholder="请选择图标"
+              style="width: 100px"
+            >
+              <el-option
+                v-for="icon in iconOptions"
+                :key="icon"
+                :label="icon"
+                :value="icon"
+              >
+                <svg class="icon" aria-hidden="true" style="font-size: 30px;">
+                  <use :xlink:href="icon" />
+                </svg>
+              </el-option>
+            </el-select>
           </el-form-item>
           
           <el-form-item prop="color">
@@ -113,7 +124,18 @@
           <el-input v-model="editForm.name" />
         </el-form-item>
         <el-form-item label="图标" prop="icon">
-          <el-input v-model="editForm.icon" />
+          <el-select v-model="editForm.icon" placeholder="请选择图标" style="width: 100px">
+            <el-option
+              v-for="icon in iconOptions"
+              :key="icon"
+              :label="icon"
+              :value="icon"
+            >
+              <svg class="icon" aria-hidden="true" style="font-size: 30px;">
+                <use :xlink:href="icon" />
+              </svg>
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="颜色" prop="color">
           <el-color-picker v-model="editForm.color" />
@@ -162,9 +184,62 @@ export default {
     // 表单数据
     const form = ref({
       name: "",
-      icon: "🍽️",
+      icon: "#food-icon-a-001-drink",
       color: "#409eff",
     });
+    
+    // 图标选项
+    const iconOptions = ref([
+      "#food-icon-a-001-drink",
+      "#food-icon-a-011-food",
+      "#food-icon-a-005-snack",
+      "#food-icon-a-003-food",
+      "#food-icon-a-009-snack",
+      "#food-icon-a-002-food",
+      "#food-icon-a-013-food",
+      "#food-icon-a-019-food",
+      "#food-icon-a-007-food",
+      "#food-icon-a-012-bread",
+      "#food-icon-a-004-meat",
+      "#food-icon-a-017-strawberry",
+      "#food-icon-a-006-strawberry",
+      "#food-icon-a-020-cheese",
+      "#food-icon-a-015-food",
+      "#food-icon-a-018-strawberry",
+      "#food-icon-a-010-food",
+      "#food-icon-a-014-food",
+      "#food-icon-a-016-breakfast",
+      "#food-icon-a-008-food",
+      "#food-icon-a-001-sweet",
+      "#food-icon-a-003-whiskey",
+      "#food-icon-a-008-drink",
+      "#food-icon-a-002-drink",
+      "#food-icon-a-009-sweet",
+      "#food-icon-a-006-drink",
+      "#food-icon-a-007-strawberry",
+      "#food-icon-a-004-cup",
+      "#food-icon-a-022-glass",
+      "#food-icon-a-015-drink",
+      "#food-icon-a-013-drink",
+      "#food-icon-a-025-drink",
+      "#food-icon-a-017-drink",
+      "#food-icon-a-014-glass",
+      "#food-icon-a-019-alcohol",
+      "#food-icon-a-016-moccha",
+      "#food-icon-a-020-milk",
+      "#food-icon-a-023-drink",
+      "#food-icon-a-021-milk",
+      "#food-icon-a-027-tropical",
+      "#food-icon-a-029-drink",
+      "#food-icon-a-010-fruit",
+      "#food-icon-a-028-healthy",
+      "#food-icon-a-012-drink",
+      "#food-icon-a-030-drink",
+      "#food-icon-a-005-softdrinkcan",
+      "#food-icon-a-018-hotamericano",
+      "#food-icon-a-026-drink",
+      "#food-icon-a-024-drink",
+    ]);
 
     const editForm = ref({
       id: null,
@@ -323,6 +398,7 @@ export default {
     // 处理关闭
     const handleClose = () => {
       resetForm();
+
       showEditDialog.value = false;
       store.dispatch("ui/hideCategoryForm");
     };
@@ -337,6 +413,7 @@ export default {
       categories,
       loading,
       showEditDialog,
+      iconOptions,
       getCategoryShopCount,
       handleAddCategory,
       editCategory,
@@ -354,6 +431,13 @@ export default {
   padding: 16px;
   background-color: #f8f9fa;
   border-radius: 8px;
+}
+
+.form-row .el-input,
+.form-row .el-color-picker,
+.form-row .el-select,
+.form-row .el-select .iconfont {
+  width: 100px !important;
 }
 
 .add-category-form h4 {
@@ -381,6 +465,12 @@ export default {
   margin-bottom: 16px;
 }
 
+.form-row .el-input,
+  .form-row .el-color-picker,
+  .form-row .el-select {
+    width: 100px !important;
+  }
+
 @media (max-width: 768px) {
   .add-category-form,
   .category-management {
@@ -404,7 +494,8 @@ export default {
   }
   
   .form-row .el-input,
-  .form-row .el-color-picker {
+  .form-row .el-color-picker,
+  .form-row .el-select {
     width: 100px !important;
   }
   
