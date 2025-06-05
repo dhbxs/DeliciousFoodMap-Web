@@ -3,6 +3,8 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./store";
 import "../public/iconfont/iconfont.css"
+import "../public/iconfont/iconfont.js"
+import "@/assets/css/iconfont-symbol.css"
 // Element Plus
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";

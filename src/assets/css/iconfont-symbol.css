@@ -1,0 +1,11 @@
+/* 
+ * iconfont Symbol 引用方式 通用css
+ * 注意：在使用时，必须要引入该文件，否则会出现图标不显示的情况
+ */
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}

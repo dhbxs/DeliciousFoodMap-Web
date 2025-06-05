@@ -9,21 +9,14 @@
     <!-- 主要布局 -->
     <div class="main-layout" :class="{ mobile: isMobile }">
       <!-- 侧边栏 -->
-      <div
-        class="sidebar"
-        :class="{
-          collapsed: sidebarCollapsed,
-          mobile: isMobile,
-        }"
-      >
+      <div class="sidebar" :class="{
+        collapsed: sidebarCollapsed,
+        mobile: isMobile,
+      }">
         <!-- 桌面端头部 -->
-        <div v-if="!isMobile" class="sidebar-header">
+        <div v-if="!isMobile" class="sidebar-header" :class="{ collapsed: sidebarCollapsed }">
           <h2 v-if="!sidebarCollapsed">美食地图管理系统</h2>
-          <el-button
-            :icon="sidebarCollapsed ? Expand : Fold"
-            @click="toggleSidebar"
-            text
-          />
+          <el-button :icon="sidebarCollapsed ? Expand : Fold" @click="toggleSidebar" text />
         </div>
 
         <!-- 侧边栏内容 -->
@@ -31,7 +24,9 @@
           <!-- 快速操作 -->
           <div class="quick-actions">
             <el-button type="primary" @click="addShop" style="width: 100%">
-              <el-icon><Plus /></el-icon>
+              <el-icon>
+                <Plus />
+              </el-icon>
               添加店铺
             </el-button>
           </div>
@@ -57,11 +52,7 @@
     <CategoryForm />
 
     <!-- 移动端遮罩 -->
-    <div
-      v-if="isMobile && !sidebarCollapsed"
-      class="mobile-overlay"
-      @click="closeSidebar"
-    ></div>
+    <div v-if="isMobile && !sidebarCollapsed" class="mobile-overlay" @click="closeSidebar"></div>
   </div>
 </template>
 
@@ -183,7 +174,7 @@ export default {
   border-right: 1px solid #ebeef5;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
   z-index: 100;
   overflow: hidden;
   will-change: transform;
@@ -213,10 +204,17 @@ export default {
 .sidebar-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 16px;
   border-bottom: 1px solid #ebeef5;
   min-height: 60px;
+}
+
+.sidebar-header:not(.collapsed) {
+  justify-content: space-between;
+}
+
+.sidebar-header.collapsed {
+  justify-content: center;
 }
 
 .sidebar-header h2 {

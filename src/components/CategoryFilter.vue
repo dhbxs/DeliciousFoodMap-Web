@@ -3,49 +3,33 @@
     <div class="filter-header">
       <h3>分类筛选</h3>
       <div class="filter-actions">
-        <el-button
-          size="small"
-          @click="clearFilters"
-          :disabled="selectedCategories.length === 0"
-        >
+        <el-button size="small" @click="clearFilters" :disabled="selectedCategories.length === 0">
           清空
         </el-button>
-        <el-button
-          size="small"
-          type="primary"
-          @click="selectAll"
-          :disabled="selectedCategories.length === categories.length"
-        >
+        <el-button size="small" type="primary" @click="selectAll"
+          :disabled="selectedCategories.length === categories.length">
           全选
         </el-button>
       </div>
     </div>
     <div class="category-list">
-      <div
-        v-for="category in categories"
-        :key="category.id"
-        class="category-item"
-        :class="{ active: isSelected(category.name) }"
-        @click="toggleCategory(category.name)"
-      >
+      <div v-for="category in categories" :key="category.id" class="category-item"
+        :class="{ active: isSelected(category.name) }" @click="toggleCategory(category.name)">
         <div class="category-icon" :style="{ backgroundColor: category.color }">
-          {{ category.icon }}
+          <svg class="icon" aria-hidden="true">
+            <use :xlink:href="category.icon"></use>
+          </svg>
         </div>
         <span class="category-name">{{ category.name }}</span>
-        <span class="category-count"
-          >({{ getCategoryCount(category.name) }})</span
-        >
+        <span class="category-count">({{ getCategoryCount(category.name) }})</span>
       </div>
     </div>
 
     <div class="filter-footer">
-      <el-button
-        type="primary"
-        size="small"
-        @click="showCategoryManager"
-        style="width: 100%"
-      >
-        <el-icon><Setting /></el-icon>
+      <el-button type="primary" size="small" @click="showCategoryManager" style="width: 100%">
+        <el-icon>
+          <Setting />
+        </el-icon>
         管理分类
       </el-button>
     </div>
@@ -56,6 +40,7 @@
 import { computed, ref, onMounted } from "vue";
 import { useStore } from "vuex";
 import { Setting } from "@element-plus/icons-vue";
+import { ElMessage } from 'element-plus';
 import { getCategoryData } from "@/api/categoryApi";
 
 export default {
@@ -67,7 +52,7 @@ export default {
   setup() {
     const store = useStore();
     const categories = ref([]);
-    
+
     onMounted(async () => {
       try {
         const response = await getCategoryData();
