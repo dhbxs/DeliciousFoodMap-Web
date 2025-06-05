@@ -23,10 +23,10 @@ export function getCategoryData(params = {}) {
  * @param {*} params "{"id": "111","name": "小吃","displayName": "小小吃","color": "#fff","icon": "#food-icon-a-010-food","isDelete": "N"}"
  * @returns boolean true/false
  */
-export function insertOrUpdateOrDeleteCategory(params = {}) {
+export function insertOrUpdateOrDeleteCategory(data = {}) {
     return request({
         method: 'POST',
         url: '/category/insert-or-update-or-delete',
-        params: params
+        data: data
     })
 }

@@ -59,7 +59,7 @@
         </div>
       </el-form>
     </div>
-
+    
     <!-- 现有分类列表 -->
     <div class="category-management">
       <h4>现有分类</h4>
@@ -83,7 +83,7 @@
               ({{ getCategoryShopCount(category.name) }})
             </span>
           </div>
-
+          
           <div class="category-actions">
             <el-button
               size="small"
@@ -106,7 +106,7 @@
         </div>
       </div>
     </div>
-
+    
     <!-- 编辑分类对话框 -->
     <el-dialog
       v-model="showEditDialog"
@@ -141,7 +141,7 @@
           <el-color-picker v-model="editForm.color" />
         </el-form-item>
       </el-form>
-
+      
       <template #footer>
         <el-button @click="showEditDialog = false">取消</el-button>
         <el-button
@@ -153,7 +153,7 @@
         </el-button>
       </template>
     </el-dialog>
-
+    
     <template #footer>
       <el-button @click="handleClose">关闭</el-button>
     </template>
@@ -165,7 +165,7 @@ import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Edit, Delete } from "@element-plus/icons-vue";
-import { getCategoryData } from "../api/categoryApi";
+import { getCategoryData, insertOrUpdateOrDeleteCategory} from "../api/categoryApi";
 
 export default {
   name: "CategoryForm",
@@ -173,7 +173,7 @@ export default {
     Edit,
     Delete,
   },
-
+  
   setup() {
     const store = useStore();
     const formRef = ref(null);
@@ -207,9 +207,13 @@ export default {
       "#food-icon-a-015-food",
       "#food-icon-a-018-strawberry",
       "#food-icon-a-010-food",
-      "#food-icon-a-014-food",
-      "#food-icon-a-016-breakfast",
-      "#food-icon-a-008-food",
+      "#food-icon-a-028-healthy",
+      "#food-icon-a-012-drink",
+      "#food-icon-a-030-drink",
+      "#food-icon-a-005-softdrinkcan",
+      "#food-icon-a-018-hotamericano",
+      "#food-icon-a-026-drink",
+      "#food-icon-a-024-drink",
       "#food-icon-a-001-sweet",
       "#food-icon-a-003-whiskey",
       "#food-icon-a-008-drink",
@@ -239,8 +243,33 @@ export default {
       "#food-icon-a-018-hotamericano",
       "#food-icon-a-026-drink",
       "#food-icon-a-024-drink",
+      "#food-icon-a-001-sweet",
+      "#food-icon-a-003-whiskey",
+      "#food-icon-a-008-drink",
+      "#food-icon-a-002-drink",
+      "#food-icon-a-009-sweet",
+      "#food-icon-a-006-drink",
+      "#food-icon-a-007-strawberry",
+      "#food-icon-a-004-cup",
+      "#food-icon-a-022-glass",
+      "#food-icon-a-015-drink",
+      "#food-icon-a-013-drink",
+      "#food-icon-a-025-drink",
+      "#food-icon-a-017-drink",
+      "#food-icon-a-014-glass",
+      "#food-icon-a-019-alcohol",
+      "#food-icon-a-016-moccha",
+      "#food-icon-a-020-milk",
+      "#food-icon-a-023-drink",
+      "#food-icon-a-021-milk",
+      "#food-icon-a-027-tropical",
+      "#food-icon-a-029-drink",
+      "#food-icon-a-010-fruit",
+      "#food-icon-a-028-healthy",
+      "#food-icon-a-012-drink",
+      "#food-icon-a-030-drink"
     ]);
-
+    
     const editForm = ref({
       id: null,
       name: "",
@@ -257,7 +286,7 @@ export default {
         }
       },
     });
-
+    
     const categories = ref([]);
     
     onMounted(async () => {
@@ -295,7 +324,7 @@ export default {
     const resetForm = () => {
       form.value = {
         name: "",
-        icon: "🍽️",
+        icon: "#food-icon-a-001-drink",
         color: "#409eff",
       };
 
@@ -312,14 +341,23 @@ export default {
         await formRef.value.validate();
         loading.value = true;
 
-        await store.dispatch("categories/addCategory", {
+        const result = await insertOrUpdateOrDeleteCategory({
           name: form.value.name,
           icon: form.value.icon,
           color: form.value.color,
+          id: null,
+          isDelete: 'N'
         });
 
-        ElMessage.success("分类添加成功");
-        resetForm();
+        if (result) {
+          ElMessage.success("分类添加成功");
+          resetForm();
+          // Refresh categories after adding
+          const response = await getCategoryData();
+          categories.value = response.data;
+        } else {
+          ElMessage.error("添加分类失败");
+        }
       } catch (error) {
         if (error.message) {
           ElMessage.error(error.message);
@@ -348,15 +386,23 @@ export default {
         await editFormRef.value.validate();
         loading.value = true;
 
-        await store.dispatch("categories/updateCategory", {
+        const result = await insertOrUpdateOrDeleteCategory({
           id: editForm.value.id,
           name: editForm.value.name,
           icon: editForm.value.icon,
           color: editForm.value.color,
+          isDelete: 'N'
         });
 
-        ElMessage.success("分类更新成功");
-        showEditDialog.value = false;
+        if (result) {
+          ElMessage.success("分类更新成功");
+          showEditDialog.value = false;
+          // Refresh categories after update
+          const response = await getCategoryData();
+          categories.value = response.data;
+        } else {
+          ElMessage.error("更新分类失败");
+        }
       } catch (error) {
         if (error.message) {
           ElMessage.error(error.message);
@@ -384,8 +430,19 @@ export default {
       })
         .then(async () => {
           try {
-            await store.dispatch("categories/deleteCategory", category.id);
-            ElMessage.success("分类删除成功");
+            const result = await insertOrUpdateOrDeleteCategory({
+              id: category.id,
+              isDelete: 'Y'
+            });
+
+            if (result) {
+              ElMessage.success("分类删除成功");
+              // Refresh categories after deletion
+              const response = await getCategoryData();
+              categories.value = response.data;
+            } else {
+              ElMessage.error("删除分类失败");
+            }
           } catch (error) {
             ElMessage.error(error.message || "删除失败");
           }
@@ -398,7 +455,6 @@ export default {
     // 处理关闭
     const handleClose = () => {
       resetForm();
-
       showEditDialog.value = false;
       store.dispatch("ui/hideCategoryForm");
     };
