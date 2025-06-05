@@ -2,7 +2,8 @@
   <el-dialog
     v-model="visible"
     title="分类管理"
-    width="600px"
+    width="90%"
+    max-width="600px"
     @close="handleClose"
   >
     <!-- 添加新分类表单 -->
@@ -12,35 +13,39 @@
         ref="formRef"
         :model="form"
         :rules="rules"
-        inline
         @submit.prevent="handleAddCategory"
       >
-        <el-form-item prop="name">
-          <el-input
-            v-model="form.name"
-            placeholder="分类名称"
-            style="width: 120px"
-          />
-        </el-form-item>
-        <el-form-item prop="icon">
-          <el-input
-            v-model="form.icon"
-            placeholder="图标"
-            style="width: 80px"
-          />
-        </el-form-item>
-        <el-form-item prop="color">
-          <el-color-picker v-model="form.color" />
-        </el-form-item>
-        <el-form-item>
-          <el-button
-            type="primary"
-            @click="handleAddCategory"
-            :loading="loading"
-          >
-            添加
-          </el-button>
-        </el-form-item>
+        <div class="form-row">
+          <el-form-item prop="name">
+            <el-input
+              v-model="form.name"
+              placeholder="分类名称"
+              style="width: 120px"
+            />
+          </el-form-item>
+          
+          <el-form-item prop="icon">
+            <el-input
+              v-model="form.icon"
+              placeholder="图标"
+              style="width: 80px"
+            />
+          </el-form-item>
+          
+          <el-form-item prop="color">
+            <el-color-picker v-model="form.color" />
+          </el-form-item>
+          
+          <el-form-item>
+            <el-button
+              type="primary"
+              @click="handleAddCategory"
+              :loading="loading"
+            >
+              添加
+            </el-button>
+          </el-form-item>
+        </div>
       </el-form>
     </div>
 
@@ -58,7 +63,9 @@
               class="category-icon"
               :style="{ backgroundColor: category.color }"
             >
-              {{ category.icon }}
+              <svg class="icon" aria-hidden="true" style="font-size: 30px;">
+                <use :xlink:href="category.icon"></use>
+              </svg>
             </div>
             <span class="category-name">{{ category.name }}</span>
             <span class="category-count">
@@ -361,10 +368,60 @@ export default {
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(45%, 1fr));
   gap: 12px;
   max-height: 300px;
   overflow-y: auto;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .add-category-form,
+  .category-management {
+    padding: 12px;
+  }
+  
+  .form-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+  
+  .form-row .el-form-item {
+    flex: 0 0 auto;
+    min-width: 100px;
+  }
+  
+  .form-row .el-form-item__content {
+    width: 100px;
+  }
+  
+  .form-row .el-input,
+  .form-row .el-color-picker {
+    width: 100px !important;
+  }
+  
+  .form-row .el-form-item:last-child {
+    margin-left: auto;
+    min-width: 80px;
+  }
+  
+  .category-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .category-actions {
+    margin-top: 8px;
+    justify-content: flex-end;
+  }
 }
 
 .category-card {

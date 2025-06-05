@@ -16,7 +16,7 @@
       <div v-for="category in categories" :key="category.id" class="category-item"
         :class="{ active: isSelected(category.name) }" @click="toggleCategory(category.name)">
         <div class="category-icon" :style="{ backgroundColor: category.color }">
-          <svg class="icon" aria-hidden="true">
+          <svg class="icon" aria-hidden="true" style="font-size: 30px;">
             <use :xlink:href="category.icon"></use>
           </svg>
         </div>
