@@ -4,7 +4,7 @@
       <h3>店铺列表</h3>
       <div class="list-stats">
         <el-tag size="small">
-          共 {{ filteredShops?.length || 0 }} 家店铺
+          共 {{ displayShops.length }} 家店铺
         </el-tag>
       </div>
     </div>
@@ -89,10 +89,11 @@
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Edit, Delete, Location, Plus } from "@element-plus/icons-vue";
+import { getCategoryData } from "@/api/poiDataApi";
 
 export default {
   name: "ShopList",
@@ -110,8 +111,8 @@ export default {
     const searchResults = ref([]);
 
     // 计算属性
-    const filteredShops = computed(() => store.getters["shops/filteredShops"]);
-    const selectedShop = computed(() => store.getters["shops/selectedShop"]);
+    const shops = ref([]);
+    const selectedShop = ref(null);
     const categories = computed(
       () => store.getters["categories/allCategories"]
     );
@@ -119,7 +120,7 @@ export default {
     // 显示的店铺列表（考虑搜索）
     const displayShops = computed(() => {
       if (!searchKeyword.value.trim()) {
-        return filteredShops.value;
+        return shops.value;
       }
       return searchResults.value;
     });
@@ -155,13 +156,9 @@ export default {
 
     // 搜索处理
     const handleSearch = (keyword) => {
-      if (!keyword.trim()) {
-        searchResults.value = [];
-        return;
-      }
-
+      // 前端搜索逻辑保留作为过渡方案
       const lowerKeyword = keyword.toLowerCase();
-      searchResults.value = filteredShops.value.filter(
+      const results = shops.value.filter(
         (shop) =>
           shop.name.toLowerCase().includes(lowerKeyword) ||
           shop.address.toLowerCase().includes(lowerKeyword) ||
@@ -169,13 +166,12 @@ export default {
           (shop.description &&
             shop.description.toLowerCase().includes(lowerKeyword))
       );
+      searchResults.value = results;
     };
 
     // 选择店铺
     const selectShop = (shop) => {
-      store.dispatch("shops/selectShop", shop);
-
-      // 在地图上居中显示选中的店铺
+      selectedShop.value = shop;
       store.dispatch("ui/setMapState", {
         center: [shop.lat, shop.lng],
         zoom: 16,
@@ -202,8 +198,12 @@ export default {
           store.dispatch("shops/deleteShop", shop.id);
           ElMessage.success("删除成功");
 
+          // 从本地列表中移除店铺
+          shops.value = shops.value.filter(s => s.id !== shop.id);
+          
           // 如果删除的是当前选中的店铺，清除选择
           if (selectedShop.value?.id === shop.id) {
+            selectedShop.value = null;
             store.dispatch("shops/clearSelection");
           }
         })
@@ -218,11 +218,31 @@ export default {
     };
 
     // 监听筛选变化，清空搜索
-    watch(filteredShops, () => {
-      if (searchKeyword.value) {
-        handleSearch(searchKeyword.value);
+    // 初始化加载数据
+    const fetchInitialData = async () => {
+      try {
+        const response = await getCategoryData({
+          pageNum: 1,
+          pageSize: 100,
+        });
+        
+        // 确保响应数据是数组格式
+        if (Array.isArray(response.data?.records)) {
+          shops.value = response.data.records;
+        } else if (Array.isArray(response.data)) {
+          shops.value = response.data;
+        } else {
+          shops.value = [];
+          console.error('Invalid API response format', response);
+        }
+      } catch (error) {
+        ElMessage.error("加载店铺数据失败");
+        shops.value = [];
       }
-    });
+    };
+    
+    // 组件挂载时加载数据
+    fetchInitialData();
 
     return {
       searchKeyword,
