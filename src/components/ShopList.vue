@@ -227,7 +227,6 @@ export default {
           pageSize: 100,
         });
         shopsTotal.value = response.data.total;
-        console.log(shopsTotal.value);
         // 确保响应数据是数组格式
         if (Array.isArray(response.data?.records)) {
           shops.value = response.data.records;
@@ -260,6 +259,7 @@ export default {
       editShop,
       deleteShop,
       addShop,
+      shopsTotal
     };
   },
 };
