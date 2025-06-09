@@ -70,7 +70,7 @@
           </p>
           <div class="shop-meta">
             <el-text size="small" type="info">
-              添加时间: {{ formatDate(shop.createdAt) }}
+              添加时间: {{ formatDate(shop.createdTime) }}
             </el-text>
           </div>
         </div>

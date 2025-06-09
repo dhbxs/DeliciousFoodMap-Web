@@ -32,7 +32,16 @@
           </div>
 
           <!-- 分类筛选 -->
-          <CategoryFilter />
+          <div class="category-filter-header">
+            <h3>分类筛选</h3>
+            <el-button
+              :icon="categoryFilterCollapsed ? Expand : Fold"
+              @click="toggleCategoryFilter"
+              circle
+              size="small"
+            />
+          </div>
+          <CategoryFilter v-if="!categoryFilterCollapsed" />
 
           <!-- 店铺列表 -->
           <div class="shop-list-container">
@@ -57,7 +66,7 @@
 </template>
 
 <script>
-import { computed, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
 import { Menu, Plus, Expand, Fold } from "@element-plus/icons-vue";
 
@@ -86,6 +95,12 @@ export default {
       () => store.getters["ui/sidebarCollapsed"]
     );
     const isMobile = computed(() => store.getters["ui/isMobile"]);
+    
+    // 分类筛选折叠状态
+    const categoryFilterCollapsed = ref(false);
+    const toggleCategoryFilter = () => {
+      categoryFilterCollapsed.value = !categoryFilterCollapsed.value;
+    };
 
     // 切换侧边栏
     const toggleSidebar = () => {
@@ -127,6 +142,8 @@ export default {
       toggleSidebar,
       closeSidebar,
       addShop,
+      toggleCategoryFilter,
+      categoryFilterCollapsed,
       Menu,
       Plus,
       Expand,
@@ -236,10 +253,26 @@ export default {
   border-bottom: 1px solid #ebeef5;
 }
 
+.category-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.category-filter-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: bold;
+  color: #303133;
+}
+
 .shop-list-container {
   flex: 1;
   overflow: hidden;
   padding: 16px;
+  height: calc(100% - 60px);
 }
 
 .map-area {

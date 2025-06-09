@@ -1,7 +1,7 @@
 <template>
   <div class="category-filter">
     <div class="filter-header">
-      <h3>分类筛选</h3>
+      <h3></h3>
       <div class="filter-actions">
         <el-button size="small" @click="clearFilters" :disabled="selectedCategories.length === 0">
           清空
@@ -153,7 +153,7 @@ export default {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-height: 300px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
