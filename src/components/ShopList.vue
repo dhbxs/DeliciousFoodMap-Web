@@ -4,7 +4,7 @@
       <h3>店铺列表</h3>
       <div class="list-stats">
         <el-tag size="small">
-          共 {{ displayShops.length }} 家店铺
+          共 {{ shopsTotal }} 家店铺
         </el-tag>
       </div>
     </div>
@@ -93,7 +93,7 @@ import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Edit, Delete, Location, Plus } from "@element-plus/icons-vue";
-import { getCategoryData } from "@/api/poiDataApi";
+import { getPoiData } from "@/api/poiDataApi";
 
 export default {
   name: "ShopList",
@@ -112,6 +112,7 @@ export default {
 
     // 计算属性
     const shops = ref([]);
+    const shopsTotal = ref(null);
     const selectedShop = ref(null);
     const categories = computed(
       () => store.getters["categories/allCategories"]
@@ -221,22 +222,25 @@ export default {
     // 初始化加载数据
     const fetchInitialData = async () => {
       try {
-        const response = await getCategoryData({
+        const response = await getPoiData({
           pageNum: 1,
           pageSize: 100,
         });
-        
+        shopsTotal.value = response.data.total;
+        console.log(shopsTotal.value);
         // 确保响应数据是数组格式
         if (Array.isArray(response.data?.records)) {
           shops.value = response.data.records;
         } else if (Array.isArray(response.data)) {
           shops.value = response.data;
         } else {
+          shopsTotal.value = 0;
           shops.value = [];
           console.error('Invalid API response format', response);
         }
       } catch (error) {
         ElMessage.error("加载店铺数据失败");
+        shopsTotal.value = 0;
         shops.value = [];
       }
     };

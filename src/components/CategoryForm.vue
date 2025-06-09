@@ -165,7 +165,7 @@ import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Edit, Delete } from "@element-plus/icons-vue";
-import { getCategoryData, insertOrUpdateOrDeleteCategory} from "../api/categoryApi";
+import { getCategoryData, insertOrUpdateOrDeleteCategory} from "@/api/categoryApi";
 
 export default {
   name: "CategoryForm",
