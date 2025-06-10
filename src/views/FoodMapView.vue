@@ -13,10 +13,11 @@
         collapsed: sidebarCollapsed,
         mobile: isMobile,
       }">
+        <!-- 侧边栏展开折叠按钮 -->
+        <el-button class="sidebar-button" :icon="sidebarCollapsed ? ArrowLeft : ArrowRight" @click="toggleSidebar" text />
         <!-- 桌面端头部 -->
         <div v-if="!isMobile" class="sidebar-header" :class="{ collapsed: sidebarCollapsed }">
-          <h2 v-if="!sidebarCollapsed">美食地图管理系统</h2>
-          <el-button :icon="sidebarCollapsed ? Expand : Fold" @click="toggleSidebar" text />
+          <h2 v-if="!sidebarCollapsed">未境美食地图</h2>
         </div>
 
         <!-- 侧边栏内容 -->
@@ -35,7 +36,7 @@
           <div class="category-filter-header">
             <h3>分类筛选</h3>
             <el-button
-              :icon="categoryFilterCollapsed ? Expand : Fold"
+              :icon="categoryFilterCollapsed ? ArrowDown : ArrowUp"
               @click="toggleCategoryFilter"
               circle
               size="small"
@@ -68,7 +69,7 @@
 <script>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
-import { Menu, Plus, Expand, Fold } from "@element-plus/icons-vue";
+import { Menu, Plus, ArrowLeft, ArrowRight, Fold, ArrowDown, ArrowUp } from "@element-plus/icons-vue";
 
 // 导入组件
 import MapView from "@/components/MapView.vue";
@@ -146,8 +147,10 @@ export default {
       categoryFilterCollapsed,
       Menu,
       Plus,
-      Expand,
-      Fold,
+      ArrowLeft,
+      ArrowRight,
+      ArrowDown,
+      ArrowUp,
     };
   },
 };
@@ -184,7 +187,7 @@ export default {
 .sidebar:not(.mobile) {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   height: 100%;
   width: 350px;
   background: white;
@@ -193,13 +196,28 @@ export default {
   flex-direction: column;
   transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
   z-index: 100;
-  overflow: hidden;
+  /* overflow: hidden; */
   will-change: transform;
 }
 
+.sidebar-button:not(.mobile) {
+  position: absolute;
+  top: 50%;
+  left: -40px;
+  width: 40px;
+  height: 40px;
+  transform: translateY(-50%);
+  background-color: #fff;
+  border-radius: 50% 0 0 50%;
+}
+
 .sidebar:not(.mobile).collapsed {
-  width: 60px;
-  transform: translateX(0);
+  width: 0;
+  height: 40px;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  border-radius: 50% 0 0 50%;
 }
 
 .sidebar.mobile {
@@ -221,17 +239,10 @@ export default {
 .sidebar-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 16px;
   border-bottom: 1px solid #ebeef5;
   min-height: 60px;
-}
-
-.sidebar-header:not(.collapsed) {
-  justify-content: space-between;
-}
-
-.sidebar-header.collapsed {
-  justify-content: center;
 }
 
 .sidebar-header h2 {
