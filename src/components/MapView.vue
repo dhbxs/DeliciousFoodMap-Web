@@ -85,7 +85,15 @@ export default {
 
       // 添加地图控件
       map.value.addControl(new window.AMap.Scale());
-      map.value.addControl(new window.AMap.ToolBar());
+      map.value.addControl(new window.AMap.ToolBar(
+        {
+          position: { bottom: "50px", left: "10px" }, // 控制条位置
+          visible: true, // 是否显示
+          Locate: true, // 定位按钮
+          Zoom: true, // 缩放按钮
+          Scale: true, // 比例尺
+        }
+      ));
 
       // 地图点击事件
       map.value.on("click", handleMapClick);
