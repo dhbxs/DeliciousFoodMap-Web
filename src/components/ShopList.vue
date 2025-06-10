@@ -155,26 +155,40 @@ export default {
       });
     };
 
-    // 搜索处理
-    const handleSearch = (keyword) => {
-      // 前端搜索逻辑保留作为过渡方案
-      const lowerKeyword = keyword.toLowerCase();
-      const results = shops.value.filter(
-        (shop) =>
-          shop.name.toLowerCase().includes(lowerKeyword) ||
-          shop.address.toLowerCase().includes(lowerKeyword) ||
-          shop.category.toLowerCase().includes(lowerKeyword) ||
-          (shop.description &&
-            shop.description.toLowerCase().includes(lowerKeyword))
-      );
-      searchResults.value = results;
+    // 搜索处理 - 调用后端接口
+    const handleSearch = async (keyword) => {
+      if (!keyword.trim()) {
+        // 如果关键字为空，清空搜索结果，显示初始列表
+        searchResults.value = [];
+        return;
+      }
+
+      try {
+        const response = await getPoiData({
+          pageNum: 1,
+          pageSize: 100,
+          keywords: keyword
+        });
+
+        if (Array.isArray(response.data?.records)) {
+          searchResults.value = response.data.records;
+        } else if (Array.isArray(response.data)) {
+          searchResults.value = response.data;
+        } else {
+          console.error('搜索API返回格式无效', response);
+          searchResults.value = [];
+        }
+      } catch (error) {
+        ElMessage.error("搜索失败");
+        searchResults.value = [];
+      }
     };
 
     // 选择店铺
     const selectShop = (shop) => {
       selectedShop.value = shop;
       store.dispatch("ui/setMapState", {
-        center: [shop.lat, shop.lng],
+        center: [shop.latitude, shop.longitude],
         zoom: 16,
       });
     };

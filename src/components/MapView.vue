@@ -234,6 +234,27 @@ export default {
         .catch(() => {});
     };
 
+    // 监听地图中心点和缩放级别变化
+    watch([mapCenter, mapZoom], ([newCenter, newZoom]) => {
+      if (!map.value || !newCenter) return;
+      
+      // 获取当前地图中心点和缩放级别
+      const currentCenter = map.value.getCenter();
+      const currentZoom = map.value.getZoom();
+      
+      // 检查是否有变化（考虑浮点精度）
+      const centerChanged = 
+        Math.abs(newCenter[0] - currentCenter.lat) > 1e-6 || 
+        Math.abs(newCenter[1] - currentCenter.lng) > 1e-6;
+      const zoomChanged = newZoom !== currentZoom;
+      
+      // 如果变化，更新地图视图
+      if (centerChanged || zoomChanged) {
+        map.value.setCenter([newCenter[1], newCenter[0]]); // 注意坐标转换
+        map.value.setZoom(newZoom);
+      }
+    });
+
     onMounted(() => {
       initMap();
     });
