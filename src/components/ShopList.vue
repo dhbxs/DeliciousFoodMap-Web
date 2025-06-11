@@ -19,6 +19,14 @@
           <el-icon><Search /></el-icon>
         </template>
       </el-input>
+      <el-button
+        class="refresh-button"
+        type="primary"
+        :icon="Refresh"
+        circle
+        @click="fetchInitialData"
+        title="刷新店铺列表"
+      />
     </div>
 
     <div class="shop-items" v-if="displayShops.length > 0">
@@ -89,10 +97,10 @@
 </template>
 
 <script>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Search, Edit, Delete, Location, Plus } from "@element-plus/icons-vue";
+import { Search, Edit, Delete, Location, Plus, Refresh } from "@element-plus/icons-vue";
 import { getPoiData } from "@/api/poiDataApi";
 
 export default {
@@ -103,6 +111,7 @@ export default {
     Delete,
     Location,
     Plus,
+    Refresh,
   },
 
   setup() {
@@ -112,7 +121,7 @@ export default {
 
     // 计算属性
     const shops = ref([]);
-    const shopsTotal = ref(null);
+    const shopsTotal = ref(0);
     const selectedShop = ref(null);
     const categories = computed(
       () => store.getters["categories/allCategories"]
@@ -209,17 +218,21 @@ export default {
           cancelButtonText: "取消",
         }
       )
-        .then(() => {
-          store.dispatch("shops/deleteShop", shop.id);
-          ElMessage.success("删除成功");
-
-          // 从本地列表中移除店铺
-          shops.value = shops.value.filter(s => s.id !== shop.id);
-          
-          // 如果删除的是当前选中的店铺，清除选择
-          if (selectedShop.value?.id === shop.id) {
-            selectedShop.value = null;
-            store.dispatch("shops/clearSelection");
+        .then(async () => {
+          try {
+            await store.dispatch("shops/deleteShop", shop.id);
+            ElMessage.success("删除成功");
+            
+            // 重新加载店铺列表
+            fetchInitialData();
+            
+            // 如果删除的是当前选中的店铺，清除选择
+            if (selectedShop.value?.id === shop.id) {
+              selectedShop.value = null;
+              store.dispatch("shops/clearSelection");
+            }
+          } catch (error) {
+            ElMessage.error(error.message || "删除失败");
           }
         })
         .catch(() => {
@@ -232,25 +245,16 @@ export default {
       store.dispatch("ui/showShopForm");
     };
 
-    // 监听筛选变化，清空搜索
     // 初始化加载数据
     const fetchInitialData = async () => {
       try {
-        const response = await getPoiData({
+        const result = await store.dispatch("shops/fetchShops", {
           pageNum: 1,
           pageSize: 100,
         });
-        shopsTotal.value = response.data.total;
-        // 确保响应数据是数组格式
-        if (Array.isArray(response.data?.records)) {
-          shops.value = response.data.records;
-        } else if (Array.isArray(response.data)) {
-          shops.value = response.data;
-        } else {
-          shopsTotal.value = 0;
-          shops.value = [];
-          console.error('Invalid API response format', response);
-        }
+        
+        shops.value = result.records || [];
+        shopsTotal.value = result.total || 0;
       } catch (error) {
         ElMessage.error("加载店铺数据失败");
         shopsTotal.value = 0;
@@ -259,7 +263,9 @@ export default {
     };
     
     // 组件挂载时加载数据
-    fetchInitialData();
+    onMounted(() => {
+      fetchInitialData();
+    });
 
     return {
       searchKeyword,
@@ -273,7 +279,9 @@ export default {
       editShop,
       deleteShop,
       addShop,
-      shopsTotal
+      shopsTotal,
+      fetchInitialData,
+      Refresh
     };
   },
 };
@@ -306,6 +314,12 @@ export default {
 .search-bar {
   padding: 16px;
   border-bottom: 1px solid #ebeef5;
+  display: flex;
+  gap: 8px;
+}
+
+.search-bar .el-input {
+  flex: 1;
 }
 
 .shop-items {

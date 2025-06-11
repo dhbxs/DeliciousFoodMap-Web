@@ -184,8 +184,8 @@ export default {
             address: shop.address,
             category: shop.category,
             description: shop.description,
-            lat: shop.lat,
-            lng: shop.lng,
+            lat: shop.latitude || shop.lat,
+            lng: shop.longitude || shop.lng,
           };
         }
       }
@@ -215,37 +215,45 @@ export default {
           lng: form.value.lng,
         };
 
-        if (isEditing.value) {
-          // 更新店铺
-          shopData.id = editingShopId.value;
-          await store.dispatch("shops/updateShop", shopData);
-          ElMessage.success("店铺更新成功");
-        } else {
-          // 添加店铺
-          await store.dispatch("shops/addShop", shopData);
-          ElMessage.success("店铺添加成功");
+        try {
+          if (isEditing.value) {
+            // 更新店铺
+            shopData.id = editingShopId.value;
+            await store.dispatch("shops/updateShop", shopData);
+            ElMessage.success("店铺更新成功");
+          } else {
+            // 添加店铺
+            await store.dispatch("shops/addShop", shopData);
+            ElMessage.success("店铺添加成功");
 
-          // 如果分类不存在，自动添加
-          const existingCategory = store.getters[
-            "categories/getCategoryByName"
-          ](form.value.category);
-          if (!existingCategory) {
-            try {
-              await store.dispatch("categories/addCategory", {
-                name: form.value.category,
-                color: "#409eff",
-                icon: "🍽️",
-              });
-              ElMessage.success(`新分类"${form.value.category}"已自动添加`);
-            } catch (error) {
-              console.warn("自动添加分类失败:", error);
+            // 如果分类不存在，自动添加
+            const existingCategory = store.getters[
+              "categories/getCategoryByName"
+            ](form.value.category);
+            if (!existingCategory) {
+              try {
+                await store.dispatch("categories/addCategory", {
+                  name: form.value.category,
+                  color: "#409eff",
+                  icon: "🍽️",
+                });
+                ElMessage.success(`新分类"${form.value.category}"已自动添加`);
+              } catch (error) {
+                console.warn("自动添加分类失败:", error);
+              }
             }
           }
-        }
 
-        handleClose();
-      } catch (error) {
-        console.error("表单验证失败:", error);
+          // 关闭表单
+          handleClose();
+          
+          // 刷新店铺列表
+          store.dispatch("shops/fetchShops");
+        } catch (error) {
+          ElMessage.error(error.message || (isEditing.value ? "更新店铺失败" : "添加店铺失败"));
+        }
+      } catch (validationError) {
+        console.error("表单验证失败:", validationError);
       } finally {
         loading.value = false;
       }
