@@ -248,15 +248,30 @@ export default {
     // 初始化加载数据
     const fetchInitialData = async () => {
       try {
+        // 先清空当前数据
+        shops.value = [];
+        searchKeyword.value = "";
+        searchResults.value = [];
+        
+        // 强制从服务器获取最新数据
         const result = await store.dispatch("shops/fetchShops", {
           pageNum: 1,
           pageSize: 100,
+          forceRefresh: true // 添加强制刷新参数
         });
         
+        // 更新响应式数据
         shops.value = result.records || [];
         shopsTotal.value = result.total || 0;
+        
+        // 如果当前有选中的店铺，检查是否仍然存在
+        if (selectedShop.value && !shops.value.some(s => s.id === selectedShop.value.id)) {
+          selectedShop.value = null;
+          store.dispatch("shops/clearSelection");
+        }
       } catch (error) {
-        ElMessage.error("加载店铺数据失败");
+        console.error('店铺刷新失败:', error);
+        ElMessage.error("店铺刷新失败: " + (error.message || "未知错误"));
         shopsTotal.value = 0;
         shops.value = [];
       }

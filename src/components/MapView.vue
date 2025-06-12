@@ -205,9 +205,22 @@ export default {
 
         geolocation.getCurrentPosition((status, result) => {
           if (status === "complete") {
-            ElMessage.success("定位成功");
+            const pos = result.position;
+            if (pos && typeof pos.lng === "number" && typeof pos.lat === "number") {
+              map.value.setCenter([pos.lng, pos.lat]);
+              map.value.setZoom(17);
+              ElMessage.success("定位成功");
+              
+              // 更新store中的地图状态
+              store.dispatch("ui/setMapState", {
+                center: [pos.lat, pos.lng],
+                zoom: 17
+              });
+            } else {
+              ElMessage.warning("无法获取有效位置信息");
+            }
           } else {
-            ElMessage.error("定位失败：" + result.message);
+            ElMessage.error("定位失败: " + (result.message || "未知错误"));
           }
         });
 

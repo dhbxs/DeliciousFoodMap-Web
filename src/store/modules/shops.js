@@ -81,23 +81,44 @@ export default {
 
   actions: {
     // 获取所有店铺
-    async fetchShops({ commit }, params = {}) {
-      console.log("params",params);
+    async fetchShops({ commit }, { pageNum = 1, pageSize = 100, forceRefresh = false, ...params } = {}) {
+      const cacheKey = `shops-${pageNum}-${pageSize}`;
+      
+      // 清除缓存如果强制刷新
+      if (forceRefresh && this._cachedShops?.[cacheKey]) {
+        delete this._cachedShops[cacheKey];
+      }
+
+      // 使用缓存数据（如果存在且不强制刷新）
+      if (!forceRefresh && this._cachedShops?.[cacheKey]) {
+        commit("SET_SHOPS", this._cachedShops[cacheKey]);
+        return this._cachedShops[cacheKey];
+      }
+
       try {
         const response = await getPoiData({
-          pageNum: params.pageNum || 1,
-          pageSize: params.pageSize || 100,
+          pageNum,
+          pageSize,
           ...params
         });
         
+        let resultData = { records: [], total: 0 };
+        
         if (Array.isArray(response.data?.records)) {
-          commit("SET_SHOPS", response.data.records);
-          return response.data;
+          resultData = response.data;
         } else if (Array.isArray(response.data)) {
-          commit("SET_SHOPS", response.data);
-          return { records: response.data, total: response.data.length };
+          resultData = {
+            records: response.data,
+            total: response.data.length
+          };
         }
-        return { records: [], total: 0 };
+        
+        // 更新缓存
+        this._cachedShops = this._cachedShops || {};
+        this._cachedShops[cacheKey] = resultData;
+        
+        commit("SET_SHOPS", resultData.records);
+        return resultData;
       } catch (error) {
         console.error("获取店铺列表失败:", error);
         return { records: [], total: 0 };
