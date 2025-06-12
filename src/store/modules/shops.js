@@ -1,248 +1,88 @@
-// 美食店铺管理模块
-import { getPoiData, insertOrUpdateOrDeleteData } from '@/api/poiDataApi'
-
+// 店铺组件交互管理模块 - 不存储业务数据，只管理组件间交互
 export default {
   namespaced: true,
 
   state: {
-    shops: [],
-    selectedShop: null,
-    filteredCategories: [], // 当前筛选的分类
+    // 当前选中的店铺ID（用于组件间通信）
+    selectedShopId: null,
+
+    // 店铺相关的UI状态
+    shopListRefreshTrigger: 0,
+
+    // 当前的分类筛选（从分类模块接收）
+    currentCategoryFilter: [],
+
+    // 地图相关状态
+    mapSyncTrigger: 0,
   },
 
   getters: {
-    // 获取所有店铺
-    allShops: (state) => state.shops,
+    // 获取选中的店铺ID
+    selectedShopId: (state) => state.selectedShopId,
 
-    // 根据分类筛选店铺
-    filteredShops: (state) => {
-      if (state.filteredCategories.length === 0) {
-        return state.shops;
-      }
-      return state.shops.filter((shop) =>
-        state.filteredCategories.includes(shop.category)
-      );
-    },
+    // 店铺列表刷新触发器
+    shopListRefreshTrigger: (state) => state.shopListRefreshTrigger,
 
-    // 获取选中的店铺
-    selectedShop: (state) => state.selectedShop,
+    // 当前分类筛选
+    currentCategoryFilter: (state) => state.currentCategoryFilter,
 
-    // 根据ID获取店铺
-    getShopById: (state) => (id) => {
-      return state.shops.find((shop) => shop.id === id);
-    },
-
-    // 获取店铺总数
-    shopsCount: (state) => state.shops.length,
+    // 地图同步触发器
+    mapSyncTrigger: (state) => state.mapSyncTrigger,
   },
 
   mutations: {
-    // 设置店铺列表
-    SET_SHOPS(state, shops) {
-      state.shops = shops;
-    },
-    
-    // 添加店铺
-    ADD_SHOP(state, shop) {
-      state.shops.push(shop);
+    // 设置选中的店铺ID
+    SET_SELECTED_SHOP_ID(state, shopId) {
+      state.selectedShopId = shopId;
     },
 
-    // 更新店铺
-    UPDATE_SHOP(state, updatedShop) {
-      const index = state.shops.findIndex((shop) => shop.id === updatedShop.id);
-      if (index !== -1) {
-        state.shops.splice(index, 1, updatedShop);
-      }
+    // 触发店铺列表刷新
+    TRIGGER_SHOP_LIST_REFRESH(state) {
+      state.shopListRefreshTrigger += 1;
     },
 
-    // 删除店铺
-    DELETE_SHOP(state, shopId) {
-      const index = state.shops.findIndex((shop) => shop.id === shopId);
-      if (index !== -1) {
-        state.shops.splice(index, 1);
-      }
+    // 设置当前分类筛选
+    SET_CURRENT_CATEGORY_FILTER(state, categories) {
+      state.currentCategoryFilter = [...categories];
     },
 
-    // 设置选中的店铺
-    SET_SELECTED_SHOP(state, shop) {
-      state.selectedShop = shop;
-    },
-
-    // 设置分类筛选
-    SET_FILTERED_CATEGORIES(state, categories) {
-      state.filteredCategories = categories;
-    },
-
-    // 清空筛选
-    CLEAR_FILTERS(state) {
-      state.filteredCategories = [];
+    // 触发地图同步
+    TRIGGER_MAP_SYNC(state) {
+      state.mapSyncTrigger += 1;
     },
   },
 
   actions: {
-    // 获取所有店铺
-    async fetchShops({ commit }, { pageNum = 1, pageSize = 100, forceRefresh = false, ...params } = {}) {
-      const cacheKey = `shops-${pageNum}-${pageSize}`;
-      
-      // 清除缓存如果强制刷新
-      if (forceRefresh && this._cachedShops?.[cacheKey]) {
-        delete this._cachedShops[cacheKey];
-      }
+    // 选择店铺（触发地图和其他组件更新）
+    selectShop({ commit, dispatch }, shopId) {
+      commit("SET_SELECTED_SHOP_ID", shopId);
 
-      // 使用缓存数据（如果存在且不强制刷新）
-      if (!forceRefresh && this._cachedShops?.[cacheKey]) {
-        commit("SET_SHOPS", this._cachedShops[cacheKey]);
-        return this._cachedShops[cacheKey];
-      }
+      // 通知地图组件更新中心点
+      dispatch("ui/onShopSelected", shopId, { root: true });
 
-      try {
-        const response = await getPoiData({
-          pageNum,
-          pageSize,
-          ...params
-        });
-        
-        let resultData = { records: [], total: 0 };
-        
-        if (Array.isArray(response.data?.records)) {
-          resultData = response.data;
-        } else if (Array.isArray(response.data)) {
-          resultData = {
-            records: response.data,
-            total: response.data.length
-          };
-        }
-        
-        // 更新缓存
-        this._cachedShops = this._cachedShops || {};
-        this._cachedShops[cacheKey] = resultData;
-        
-        commit("SET_SHOPS", resultData.records);
-        return resultData;
-      } catch (error) {
-        console.error("获取店铺列表失败:", error);
-        return { records: [], total: 0 };
-      }
+      // 触发地图同步
+      commit("TRIGGER_MAP_SYNC");
     },
 
-    // 添加店铺
-    async addShop({ commit }, shopData) {
-      try {
-        // 准备API所需的数据格式
-        const apiData = {
-          name: shopData.name,
-          address: shopData.address,
-          description: shopData.description || "",
-          category: shopData.category,
-          longitude: shopData.lng,
-          latitude: shopData.lat,
-          isDelete: "N"
-        };
-        
-        const response = await insertOrUpdateOrDeleteData(apiData);
-        if (response.code === "200") {
-          // 如果后端返回了完整的店铺数据，使用它
-          if (response.data) {
-            commit("ADD_SHOP", response.data);
-            return response.data;
-          } else {
-            // 否则使用我们发送的数据加上一个临时ID
-            const newShop = {
-              ...shopData,
-              id: response.data?.id || Date.now(), // 使用后端返回的ID或生成临时ID
-              createdTime: new Date().toISOString(),
-            };
-            commit("ADD_SHOP", newShop);
-            return newShop;
-          }
-        } else {
-          throw new Error(response.message || "添加店铺失败");
-        }
-      } catch (error) {
-        console.error("添加店铺失败:", error);
-        throw error;
-      }
+    // 清除店铺选择
+    clearShopSelection({ commit }) {
+      commit("SET_SELECTED_SHOP_ID", null);
     },
 
-    // 更新店铺
-    async updateShop({ commit }, shopData) {
-      try {
-        // 准备API所需的数据格式
-        const apiData = {
-          id: shopData.id,
-          name: shopData.name,
-          address: shopData.address,
-          description: shopData.description || "",
-          category: shopData.category,
-          longitude: shopData.lng,
-          latitude: shopData.lat,
-          isDelete: "N"
-        };
-        
-        const response = await insertOrUpdateOrDeleteData(apiData);
-        if (response.code === "200") {
-          // 如果后端返回了完整的店铺数据，使用它
-          if (response.data) {
-            commit("UPDATE_SHOP", response.data);
-            return response.data;
-          } else {
-            // 否则使用我们发送的数据
-            const updatedShop = {
-              ...shopData,
-              updatedTime: new Date().toISOString(),
-            };
-            commit("UPDATE_SHOP", updatedShop);
-            return updatedShop;
-          }
-        } else {
-          throw new Error(response.message || "更新店铺失败");
-        }
-      } catch (error) {
-        console.error("更新店铺失败:", error);
-        throw error;
-      }
+    // 响应分类筛选变化（由分类模块调用）
+    onCategoryFilterChanged({ commit }, categories) {
+      commit("SET_CURRENT_CATEGORY_FILTER", categories);
+      // 可以在这里添加其他需要响应分类变化的逻辑
     },
 
-    // 删除店铺
-    async deleteShop({ commit }, shopId) {
-      try {
-        // 准备API所需的数据格式
-        const apiData = {
-          id: shopId,
-          isDelete: "Y"
-        };
-        
-        const response = await insertOrUpdateOrDeleteData(apiData);
-        if (response.code === "200") {
-          commit("DELETE_SHOP", shopId);
-          return true;
-        } else {
-          throw new Error(response.message || "删除店铺失败");
-        }
-      } catch (error) {
-        console.error("删除店铺失败:", error);
-        throw error;
-      }
+    // 通知店铺数据已更新（由组件调用）
+    notifyShopDataUpdate({ commit }) {
+      commit("TRIGGER_SHOP_LIST_REFRESH");
     },
 
-    // 选择店铺
-    selectShop({ commit }, shop) {
-      commit("SET_SELECTED_SHOP", shop);
-    },
-
-    // 清除选择
-    clearSelection({ commit }) {
-      commit("SET_SELECTED_SHOP", null);
-    },
-
-    // 设置分类筛选
-    setFilteredCategories({ commit }, categories) {
-      commit("SET_FILTERED_CATEGORIES", categories);
-    },
-
-    // 清空筛选
-    clearFilters({ commit }) {
-      commit("CLEAR_FILTERS");
+    // 通知需要刷新店铺列表
+    requestShopListRefresh({ commit }) {
+      commit("TRIGGER_SHOP_LIST_REFRESH");
     },
   },
 };

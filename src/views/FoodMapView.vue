@@ -70,6 +70,8 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
 import { Menu, Plus, ArrowLeft, ArrowRight, Fold, ArrowDown, ArrowUp } from "@element-plus/icons-vue";
+import categoryService from '@/services/CategoryService';
+import shopService from '@/services/ShopService';
 
 // 导入组件
 import MapView from "@/components/MapView.vue";
@@ -125,12 +127,28 @@ export default {
       store.dispatch("ui/detectMobile");
     };
 
-    onMounted(() => {
+    // 初始化数据加载
+    const initializeData = async () => {
+      try {
+        // 并行加载分类和店铺数据
+        await Promise.all([
+          categoryService.getCategories(),
+          shopService.getShops({ pageNum: 1, pageSize: 100 })
+        ]);
+      } catch (error) {
+        console.error('初始化数据加载失败:', error);
+      }
+    };
+
+    onMounted(async () => {
       // 初始化检测移动端
       store.dispatch("ui/detectMobile");
 
       // 监听窗口大小变化
       window.addEventListener("resize", handleResize);
+
+      // 加载初始数据
+      await initializeData();
     });
 
     onUnmounted(() => {

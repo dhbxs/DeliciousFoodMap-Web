@@ -165,7 +165,8 @@ import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Edit, Delete } from "@element-plus/icons-vue";
-import { getCategoryData, insertOrUpdateOrDeleteCategory} from "@/api/categoryApi";
+import categoryService from '@/services/CategoryService';
+import shopService from '@/services/ShopService';
 
 export default {
   name: "CategoryForm",
@@ -287,17 +288,17 @@ export default {
       },
     });
     
-    const categories = ref([]);
-    
+    // Use service reactive data
+    const categories = categoryService.categories;
+
     onMounted(async () => {
       try {
-        const response = await getCategoryData();
-        categories.value = response.data;
+        await categoryService.getCategories();
+        await shopService.getShops(); // Load shops for counting
       } catch (error) {
-        ElMessage.error('获取分类列表失败');
+        ElMessage.error('获取数据失败');
       }
     });
-    const allShops = computed(() => store.getters["shops/allShops"]);
 
     // 表单验证规则
     const rules = {
@@ -316,8 +317,7 @@ export default {
 
     // 获取分类下的店铺数量
     const getCategoryShopCount = (categoryName) => {
-      return allShops.value.filter((shop) => shop.category === categoryName)
-        .length;
+      return shopService.shops.value.filter((shop) => shop.category === categoryName).length;
     };
 
     // 重置表单
@@ -341,27 +341,19 @@ export default {
         await formRef.value.validate();
         loading.value = true;
 
-        const result = await insertOrUpdateOrDeleteCategory({
+        await categoryService.addCategory({
           name: form.value.name,
           icon: form.value.icon,
-          color: form.value.color,
-          id: null,
-          isDelete: 'N'
+          color: form.value.color
         });
 
-        if (result) {
-          ElMessage.success("分类添加成功");
-          resetForm();
-          // Refresh categories after adding
-          const response = await getCategoryData();
-          categories.value = response.data;
-        } else {
-          ElMessage.error("添加分类失败");
-        }
+        ElMessage.success("分类添加成功");
+        resetForm();
+
+        // 通知Vuex分类已更新
+        store.dispatch("categories/notifyCategoryUpdate");
       } catch (error) {
-        if (error.message) {
-          ElMessage.error(error.message);
-        }
+        ElMessage.error(error.message || "添加分类失败");
       } finally {
         loading.value = false;
       }
@@ -386,27 +378,20 @@ export default {
         await editFormRef.value.validate();
         loading.value = true;
 
-        const result = await insertOrUpdateOrDeleteCategory({
+        await categoryService.updateCategory({
           id: editForm.value.id,
           name: editForm.value.name,
           icon: editForm.value.icon,
-          color: editForm.value.color,
-          isDelete: 'N'
+          color: editForm.value.color
         });
 
-        if (result) {
-          ElMessage.success("分类更新成功");
-          showEditDialog.value = false;
-          // Refresh categories after update
-          const response = await getCategoryData();
-          categories.value = response.data;
-        } else {
-          ElMessage.error("更新分类失败");
-        }
+        ElMessage.success("分类更新成功");
+        showEditDialog.value = false;
+
+        // 通知Vuex分类已更新
+        store.dispatch("categories/notifyCategoryUpdate");
       } catch (error) {
-        if (error.message) {
-          ElMessage.error(error.message);
-        }
+        ElMessage.error(error.message || "更新分类失败");
       } finally {
         loading.value = false;
       }
@@ -430,19 +415,11 @@ export default {
       })
         .then(async () => {
           try {
-            const result = await insertOrUpdateOrDeleteCategory({
-              id: category.id,
-              isDelete: 'Y'
-            });
+            await categoryService.deleteCategory(category.id);
+            ElMessage.success("分类删除成功");
 
-            if (result) {
-              ElMessage.success("分类删除成功");
-              // Refresh categories after deletion
-              const response = await getCategoryData();
-              categories.value = response.data;
-            } else {
-              ElMessage.error("删除分类失败");
-            }
+            // 通知Vuex分类已更新
+            store.dispatch("categories/notifyCategoryUpdate");
           } catch (error) {
             ElMessage.error(error.message || "删除失败");
           }

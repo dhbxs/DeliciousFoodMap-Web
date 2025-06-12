@@ -91,9 +91,11 @@
 </template>
 
 <script>
-import { ref, computed, watch, nextTick } from "vue";
+import { ref, computed, watch, nextTick, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
+import categoryService from '@/services/CategoryService';
+import shopService from '@/services/ShopService';
 
 export default {
   name: "ShopForm",
@@ -125,10 +127,13 @@ export default {
 
     const isEditing = computed(() => store.getters["ui/isEditingShop"]);
     const editingShopId = computed(() => store.getters["ui/editingShopId"]);
-    const categories = computed(
-      () => store.getters["categories/allCategories"]
-    );
+    const categories = categoryService.categories;
     const tempCoordinates = computed(() => store.getters["ui/tempCoordinates"]);
+
+    // Load categories on mount
+    onMounted(async () => {
+      await categoryService.getCategories();
+    });
 
     // 表单验证规则
     const rules = {
@@ -177,7 +182,7 @@ export default {
     // 加载编辑数据
     const loadEditData = () => {
       if (isEditing.value && editingShopId.value) {
-        const shop = store.getters["shops/getShopById"](editingShopId.value);
+        const shop = shopService.getShopById(editingShopId.value);
         if (shop) {
           form.value = {
             name: shop.name,
@@ -219,25 +224,26 @@ export default {
           if (isEditing.value) {
             // 更新店铺
             shopData.id = editingShopId.value;
-            await store.dispatch("shops/updateShop", shopData);
+            await shopService.updateShop(shopData);
             ElMessage.success("店铺更新成功");
           } else {
             // 添加店铺
-            await store.dispatch("shops/addShop", shopData);
+            await shopService.addShop(shopData);
             ElMessage.success("店铺添加成功");
 
             // 如果分类不存在，自动添加
-            const existingCategory = store.getters[
-              "categories/getCategoryByName"
-            ](form.value.category);
+            const existingCategory = categoryService.getCategoryByName(form.value.category);
             if (!existingCategory) {
               try {
-                await store.dispatch("categories/addCategory", {
+                await categoryService.addCategory({
                   name: form.value.category,
                   color: "#409eff",
-                  icon: "🍽️",
+                  icon: "#food-icon-a-001-drink",
                 });
                 ElMessage.success(`新分类"${form.value.category}"已自动添加`);
+
+                // 通知Vuex分类已更新
+                store.dispatch("categories/notifyCategoryUpdate");
               } catch (error) {
                 console.warn("自动添加分类失败:", error);
               }
@@ -246,9 +252,9 @@ export default {
 
           // 关闭表单
           handleClose();
-          
-          // 刷新店铺列表
-          store.dispatch("shops/fetchShops");
+
+          // 通知Vuex店铺数据已更新
+          store.dispatch("shops/notifyShopDataUpdate");
         } catch (error) {
           ElMessage.error(error.message || (isEditing.value ? "更新店铺失败" : "添加店铺失败"));
         }

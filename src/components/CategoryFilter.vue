@@ -37,11 +37,12 @@
 </template>
 
 <script>
-import { computed, ref, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { Setting } from "@element-plus/icons-vue";
 import { ElMessage } from 'element-plus';
-import { getCategoryData } from "@/api/categoryApi";
+import categoryService from '@/services/CategoryService';
+import shopService from '@/services/ShopService';
 
 export default {
   name: "CategoryFilter",
@@ -51,20 +52,40 @@ export default {
 
   setup() {
     const store = useStore();
-    const categories = ref([]);
 
+    // Use service reactive data
+    const categories = categoryService.categories;
+
+    // Get selected categories from Vuex (for component coordination)
+    const selectedCategories = computed(
+      () => store.getters["categories/selectedCategories"]
+    );
+
+    // Get shops from service for counting
+    const shops = shopService.shops;
+
+    // Load categories on mount
     onMounted(async () => {
       try {
-        const response = await getCategoryData();
-        categories.value = response.data;
+        await categoryService.getCategories();
       } catch (error) {
         ElMessage.error('获取分类列表失败');
       }
     });
-    const selectedCategories = computed(
-      () => store.state.shops.filteredCategories
+
+    // Watch for category updates from other components
+    const categoryUpdateTrigger = computed(
+      () => store.getters["categories/categoryUpdateTrigger"]
     );
-    const allShops = computed(() => store.getters["shops/allShops"]);
+
+    watch(categoryUpdateTrigger, async () => {
+      // Refresh categories when notified of updates
+      try {
+        await categoryService.getCategories(true);
+      } catch (error) {
+        console.error('刷新分类失败:', error);
+      }
+    });
 
     // 检查分类是否被选中
     const isSelected = (categoryName) => {
@@ -73,35 +94,23 @@ export default {
 
     // 获取分类下的店铺数量
     const getCategoryCount = (categoryName) => {
-      return allShops.value.filter((shop) => shop.category === categoryName)
-        .length;
+      return shops.value.filter((shop) => shop.category === categoryName).length;
     };
 
     // 切换分类选择
     const toggleCategory = (categoryName) => {
-      const current = [...selectedCategories.value];
-      const index = current.indexOf(categoryName);
-
-      if (index > -1) {
-        // 取消选择
-        current.splice(index, 1);
-      } else {
-        // 添加选择
-        current.push(categoryName);
-      }
-
-      store.dispatch("shops/setFilteredCategories", current);
+      store.dispatch("categories/toggleCategory", categoryName);
     };
 
     // 清空筛选
     const clearFilters = () => {
-      store.dispatch("shops/clearFilters");
+      store.dispatch("categories/clearCategorySelection");
     };
 
     // 全选
     const selectAll = () => {
       const allCategoryNames = categories.value.map((cat) => cat.name);
-      store.dispatch("shops/setFilteredCategories", allCategoryNames);
+      store.dispatch("categories/selectAllCategories", allCategoryNames);
     };
 
     // 显示分类管理器

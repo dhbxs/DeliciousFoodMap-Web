@@ -178,5 +178,14 @@ export default {
         commit("SET_SIDEBAR_COLLAPSED", true);
       }
     },
+
+    // 响应店铺选择（更新地图状态）
+    onShopSelected({ commit }, shopId) {
+      // 这里可以添加当店铺被选中时需要执行的UI逻辑
+      // 比如自动关闭移动端侧边栏等
+      if (this.getters["ui/isMobile"]) {
+        commit("SET_SIDEBAR_COLLAPSED", true);
+      }
+    },
   },
 };

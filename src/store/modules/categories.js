@@ -1,113 +1,98 @@
-// 美食分类管理模块
+// 分类组件交互管理模块 - 不存储业务数据，只管理组件间交互
 export default {
   namespaced: true,
 
   state: {
-    categories: [
-      // { id: 1, name: "烧烤", color: "#ff6b6b", icon: "🍖" },
-      // { id: 2, name: "火锅", color: "#ff8787", icon: "🍲" },
-      // { id: 3, name: "小吃", color: "#ffa8a8", icon: "🍡" },
-      // { id: 4, name: "甜品", color: "#ffc9c9", icon: "🍰" },
-      // { id: 5, name: "面食", color: "#ffe0e0", icon: "🍜" },
-      // { id: 6, name: "川菜", color: "#ff5722", icon: "🌶️" },
-      // { id: 7, name: "粤菜", color: "#4caf50", icon: "🥘" },
-      // { id: 8, name: "日料", color: "#2196f3", icon: "🍣" },
-      // { id: 9, name: "西餐", color: "#9c27b0", icon: "🍝" },
-      // { id: 10, name: "咖啡", color: "#795548", icon: "☕" },
-    ],
+    // 当前选中的分类（用于组件间通信）
+    selectedCategories: [],
+
+    // 分类相关的UI状态
+    categoryFilterExpanded: true,
+
+    // 分类操作触发标识（用于通知其他组件刷新）
+    categoryUpdateTrigger: 0,
   },
 
   getters: {
-    // 获取所有分类
-    allCategories: (state) => state.categories,
+    // 获取选中的分类
+    selectedCategories: (state) => state.selectedCategories,
 
-    // 根据ID获取分类
-    getCategoryById: (state) => (id) => {
-      return state.categories.find((category) => category.id === id);
-    },
+    // 分类筛选器是否展开
+    categoryFilterExpanded: (state) => state.categoryFilterExpanded,
 
-    // 根据名称获取分类
-    getCategoryByName: (state) => (name) => {
-      return state.categories.find((category) => category.name === name);
-    },
-
-    // 获取分类名称列表
-    categoryNames: (state) => state.categories.map((cat) => cat.name),
-
-    // 获取分类总数
-    categoriesCount: (state) => state.categories.length,
+    // 分类更新触发器（用于监听变化）
+    categoryUpdateTrigger: (state) => state.categoryUpdateTrigger,
   },
 
   mutations: {
-    // 添加分类
-    ADD_CATEGORY(state, category) {
-      const newCategory = {
-        ...category,
-        id: Date.now(), // 简单的ID生成
-        color: category.color || "#409eff", // 默认颜色
-        icon: category.icon || "🍽️", // 默认图标
-      };
-      state.categories.push(newCategory);
+    // 设置选中的分类
+    SET_SELECTED_CATEGORIES(state, categories) {
+      state.selectedCategories = [...categories];
     },
 
-    // 更新分类
-    UPDATE_CATEGORY(state, updatedCategory) {
-      const index = state.categories.findIndex(
-        (cat) => cat.id === updatedCategory.id
-      );
-      if (index !== -1) {
-        state.categories.splice(index, 1, updatedCategory);
+    // 切换分类选择
+    TOGGLE_CATEGORY(state, categoryName) {
+      const index = state.selectedCategories.indexOf(categoryName);
+      if (index > -1) {
+        state.selectedCategories.splice(index, 1);
+      } else {
+        state.selectedCategories.push(categoryName);
       }
     },
 
-    // 删除分类
-    DELETE_CATEGORY(state, categoryId) {
-      const index = state.categories.findIndex((cat) => cat.id === categoryId);
-      if (index !== -1) {
-        state.categories.splice(index, 1);
-      }
+    // 清空分类选择
+    CLEAR_CATEGORY_SELECTION(state) {
+      state.selectedCategories = [];
+    },
+
+    // 设置分类筛选器展开状态
+    SET_CATEGORY_FILTER_EXPANDED(state, expanded) {
+      state.categoryFilterExpanded = expanded;
+    },
+
+    // 触发分类更新通知
+    TRIGGER_CATEGORY_UPDATE(state) {
+      state.categoryUpdateTrigger += 1;
     },
   },
 
   actions: {
-    // 添加分类
-    addCategory({ commit, getters }, categoryData) {
-      // 检查分类名称是否已存在
-      const existingCategory = getters.getCategoryByName(categoryData.name);
-      if (existingCategory) {
-        throw new Error("分类名称已存在");
-      }
-      commit("ADD_CATEGORY", categoryData);
+    // 选择分类（触发店铺列表更新）
+    selectCategories({ commit, dispatch }, categories) {
+      commit("SET_SELECTED_CATEGORIES", categories);
+      // 通知店铺模块更新筛选
+      dispatch("shops/onCategoryFilterChanged", categories, { root: true });
     },
 
-    // 更新分类
-    updateCategory({ commit, getters }, categoryData) {
-      // 检查分类名称是否与其他分类重复
-      const existingCategory = getters.getCategoryByName(categoryData.name);
-      if (existingCategory && existingCategory.id !== categoryData.id) {
-        throw new Error("分类名称已存在");
-      }
-      commit("UPDATE_CATEGORY", categoryData);
+    // 切换单个分类选择
+    toggleCategory({ commit, dispatch, state }, categoryName) {
+      commit("TOGGLE_CATEGORY", categoryName);
+      // 通知店铺模块更新筛选
+      dispatch("shops/onCategoryFilterChanged", state.selectedCategories, { root: true });
     },
 
-    // 删除分类
-    deleteCategory({ commit, rootGetters }, categoryId) {
-      // 检查是否有店铺使用此分类
-      const shops = rootGetters["shops/allShops"];
-      const category = rootGetters["categories/getCategoryById"](categoryId);
+    // 清空分类选择
+    clearCategorySelection({ commit, dispatch }) {
+      commit("CLEAR_CATEGORY_SELECTION");
+      // 通知店铺模块清空筛选
+      dispatch("shops/onCategoryFilterChanged", [], { root: true });
+    },
 
-      if (category) {
-        const shopsUsingCategory = shops.filter(
-          (shop) => shop.category === category.name
-        );
-        if (shopsUsingCategory.length > 0) {
-          throw new Error(
-            `无法删除分类"${category.name}"，还有${shopsUsingCategory.length}个店铺正在使用此分类`
-          );
-        }
-      }
+    // 全选分类
+    selectAllCategories({ commit, dispatch }, allCategoryNames) {
+      commit("SET_SELECTED_CATEGORIES", allCategoryNames);
+      // 通知店铺模块更新筛选
+      dispatch("shops/onCategoryFilterChanged", allCategoryNames, { root: true });
+    },
 
-      commit("DELETE_CATEGORY", categoryId);
+    // 切换分类筛选器展开状态
+    toggleCategoryFilter({ commit }, expanded) {
+      commit("SET_CATEGORY_FILTER_EXPANDED", expanded);
+    },
+
+    // 通知分类数据已更新（由组件调用）
+    notifyCategoryUpdate({ commit }) {
+      commit("TRIGGER_CATEGORY_UPDATE");
     },
   },
 };

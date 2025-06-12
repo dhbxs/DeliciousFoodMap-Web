@@ -27,6 +27,8 @@ import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useStore } from "vuex";
 import { Plus, Location } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import categoryService from '@/services/CategoryService';
+import shopService from '@/services/ShopService';
 
 export default {
   name: "MapView",
@@ -40,16 +42,27 @@ export default {
     const addMode = ref(false);
 
     // 计算属性
-    const shops = computed(() => store.getters["shops/filteredShops"]);
+    const shops = shopService.filteredShops;
     const mapCenter = computed(() => store.getters["ui/mapCenter"]);
     const mapZoom = computed(() => store.getters["ui/mapZoom"]);
 
+    // Watch for map sync triggers from Vuex
+    const mapSyncTrigger = computed(
+      () => store.getters["shops/mapSyncTrigger"]
+    );
+
+    watch(mapSyncTrigger, () => {
+      // Re-add markers when map sync is triggered
+      if (map.value) {
+        addShopMarkers();
+      }
+    });
+
     // 创建自定义标记内容
     const createCustomMarkerContent = (category) => {
-      const categoryData =
-        store.getters["categories/getCategoryByName"](category);
+      const categoryData = categoryService.getCategoryByName(category);
       const color = categoryData?.color || "#409eff";
-      const icon = categoryData?.icon || "🍽️";
+      const icon = categoryData?.icon || "#food-icon-a-001-drink";
 
       return `
         <div style="
@@ -65,7 +78,9 @@ export default {
           font-size: 14px;
           cursor: pointer;
         ">
-          ${icon}
+          <svg class="icon" aria-hidden="true" style="font-size: 16px; color: white;">
+            <use xlink:href="${icon}"></use>
+          </svg>
         </div>
       `;
     };
@@ -140,9 +155,25 @@ export default {
 
       // 添加新标记
       shops.value.forEach((shop) => {
+        // 验证坐标有效性
+        const lng = parseFloat(shop.lng || shop.longitude);
+        const lat = parseFloat(shop.lat || shop.latitude);
+
+        // 检查坐标是否有效
+        if (isNaN(lng) || isNaN(lat) || lng === 0 || lat === 0) {
+          console.warn(`店铺 "${shop.name}" 的坐标无效:`, { lng, lat, shop });
+          return; // 跳过无效坐标的店铺
+        }
+
+        // 检查坐标范围是否合理（中国境内大致范围）
+        if (lng < 73 || lng > 135 || lat < 3 || lat > 54) {
+          console.warn(`店铺 "${shop.name}" 的坐标超出合理范围:`, { lng, lat });
+          return; // 跳过超出范围的坐标
+        }
+
         // 创建自定义标记
         const marker = new window.AMap.Marker({
-          position: [shop.lng, shop.lat], // 高德地图使用[lng, lat]格式
+          position: [lng, lat], // 高德地图使用[lng, lat]格式
           content: createCustomMarkerContent(shop.category),
           offset: new window.AMap.Pixel(-15, -15), // 标记偏移量
         });
@@ -167,7 +198,8 @@ export default {
         // 标记点击事件
         marker.on("click", () => {
           infoWindow.open(map.value, marker.getPosition());
-          store.dispatch("shops/selectShop", shop);
+          shopService.selectShop(shop);
+          store.dispatch("shops/selectShop", shop.id);
         });
 
         // 添加标记到地图
@@ -248,9 +280,16 @@ export default {
       ElMessageBox.confirm("确定要删除这个店铺吗？", "确认删除", {
         type: "warning",
       })
-        .then(() => {
-          store.dispatch("shops/deleteShop", shopId);
-          ElMessage.success("删除成功");
+        .then(async () => {
+          try {
+            await shopService.deleteShop(shopId);
+            ElMessage.success("删除成功");
+
+            // 通知Vuex店铺数据已更新
+            store.dispatch("shops/notifyShopDataUpdate");
+          } catch (error) {
+            ElMessage.error(error.message || "删除失败");
+          }
         })
         .catch(() => {});
     };

@@ -13,7 +13,7 @@
         v-model="searchKeyword"
         placeholder="搜索店铺名称或地址..."
         clearable
-        @input="handleSearch"
+        @input="handleSearchInput"
       >
         <template #prefix>
           <el-icon><Search /></el-icon>
@@ -97,11 +97,12 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { Search, Edit, Delete, Location, Plus, Refresh } from "@element-plus/icons-vue";
-import { getPoiData } from "@/api/poiDataApi";
+import categoryService from '@/services/CategoryService';
+import shopService from '@/services/ShopService';
 
 export default {
   name: "ShopList",
@@ -116,23 +117,40 @@ export default {
 
   setup() {
     const store = useStore();
-    const searchKeyword = ref("");
-    const searchResults = ref([]);
 
-    // 计算属性
-    const shops = ref([]);
+    // Use service reactive data
+    const shops = shopService.shops;
+    const selectedShop = shopService.selectedShop;
+    const searchKeyword = shopService.searchKeyword;
+    const searchResults = shopService.searchResults;
+    const displayShops = shopService.displayShops;
+    const filteredShops = shopService.filteredShops;
+    const categories = categoryService.categories;
+
+    // Local state
     const shopsTotal = ref(0);
-    const selectedShop = ref(null);
-    const categories = computed(
-      () => store.getters["categories/allCategories"]
+
+    // Load initial data
+    onMounted(async () => {
+      await fetchInitialData();
+    });
+
+    // Watch for shop list refresh triggers from Vuex
+    const shopListRefreshTrigger = computed(
+      () => store.getters["shops/shopListRefreshTrigger"]
     );
 
-    // 显示的店铺列表（考虑搜索）
-    const displayShops = computed(() => {
-      if (!searchKeyword.value.trim()) {
-        return shops.value;
-      }
-      return searchResults.value;
+    watch(shopListRefreshTrigger, async () => {
+      await fetchInitialData();
+    });
+
+    // Watch for category filter changes from Vuex
+    const currentCategoryFilter = computed(
+      () => store.getters["shops/currentCategoryFilter"]
+    );
+
+    watch(currentCategoryFilter, (newFilter) => {
+      shopService.setFilteredCategories(newFilter);
     });
 
     // 获取分类颜色
@@ -164,38 +182,28 @@ export default {
       });
     };
 
-    // 搜索处理 - 调用后端接口
-    const handleSearch = async (keyword) => {
-      if (!keyword.trim()) {
-        // 如果关键字为空，清空搜索结果，显示初始列表
-        searchResults.value = [];
-        return;
+    // 搜索输入处理
+    const handleSearchInput = (value) => {
+      if (value.trim()) {
+        handleSearch(value);
+      } else {
+        shopService.clearSearch();
       }
+    };
 
+    // 搜索处理 - 使用服务
+    const handleSearch = async (keyword) => {
       try {
-        const response = await getPoiData({
-          pageNum: 1,
-          pageSize: 100,
-          keywords: keyword
-        });
-
-        if (Array.isArray(response.data?.records)) {
-          searchResults.value = response.data.records;
-        } else if (Array.isArray(response.data)) {
-          searchResults.value = response.data;
-        } else {
-          console.error('搜索API返回格式无效', response);
-          searchResults.value = [];
-        }
+        await shopService.searchShops(keyword);
       } catch (error) {
         ElMessage.error("搜索失败");
-        searchResults.value = [];
       }
     };
 
     // 选择店铺
     const selectShop = (shop) => {
-      selectedShop.value = shop;
+      shopService.selectShop(shop);
+      store.dispatch("shops/selectShop", shop.id);
       store.dispatch("ui/setMapState", {
         center: [shop.latitude, shop.longitude],
         zoom: 16,
@@ -220,17 +228,11 @@ export default {
       )
         .then(async () => {
           try {
-            await store.dispatch("shops/deleteShop", shop.id);
+            await shopService.deleteShop(shop.id);
             ElMessage.success("删除成功");
-            
-            // 重新加载店铺列表
-            fetchInitialData();
-            
-            // 如果删除的是当前选中的店铺，清除选择
-            if (selectedShop.value?.id === shop.id) {
-              selectedShop.value = null;
-              store.dispatch("shops/clearSelection");
-            }
+
+            // 通知Vuex刷新相关组件
+            store.dispatch("shops/notifyShopDataUpdate");
           } catch (error) {
             ElMessage.error(error.message || "删除失败");
           }
@@ -248,39 +250,22 @@ export default {
     // 初始化加载数据
     const fetchInitialData = async () => {
       try {
-        // 先清空当前数据
-        shops.value = [];
-        searchKeyword.value = "";
-        searchResults.value = [];
-        
-        // 强制从服务器获取最新数据
-        const result = await store.dispatch("shops/fetchShops", {
+        // 使用服务获取数据
+        const result = await shopService.getShops({
           pageNum: 1,
-          pageSize: 100,
-          forceRefresh: true // 添加强制刷新参数
-        });
-        
-        // 更新响应式数据
-        shops.value = result.records || [];
+          pageSize: 100
+        }, true); // 强制刷新
+
         shopsTotal.value = result.total || 0;
-        
-        // 如果当前有选中的店铺，检查是否仍然存在
-        if (selectedShop.value && !shops.value.some(s => s.id === selectedShop.value.id)) {
-          selectedShop.value = null;
-          store.dispatch("shops/clearSelection");
-        }
+
+        // 同时加载分类数据
+        await categoryService.getCategories();
       } catch (error) {
-        console.error('店铺刷新失败:', error);
-        ElMessage.error("店铺刷新失败: " + (error.message || "未知错误"));
+        console.error('数据加载失败:', error);
+        ElMessage.error("数据加载失败: " + (error.message || "未知错误"));
         shopsTotal.value = 0;
-        shops.value = [];
       }
     };
-    
-    // 组件挂载时加载数据
-    onMounted(() => {
-      fetchInitialData();
-    });
 
     return {
       searchKeyword,
@@ -290,6 +275,7 @@ export default {
       getCategoryIcon,
       formatDate,
       handleSearch,
+      handleSearchInput,
       selectShop,
       editShop,
       deleteShop,
