@@ -1,9 +1,17 @@
 <template>
   <div class="food-map-view">
-    <!-- 移动端左侧工具栏 -->
-    <div v-if="isMobile" class="left-toolbar">
-      <el-button :icon="Menu" @click="toggleSidebar" circle />
-      <el-button type="primary" :icon="Plus" @click="addShop" circle />
+    <!-- 移动端顶部工具栏 -->
+    <div v-if="isMobile" class="mobile-header">
+      <div class="mobile-header-left">
+        <el-button :icon="Menu" @click="toggleSidebar" circle class="mobile-menu-btn" />
+      </div>
+      <div class="mobile-header-center">
+        <h2 class="mobile-title">未境美食地图</h2>
+      </div>
+      <div class="mobile-header-right">
+        <ThemeToggle />
+        <el-button type="primary" :icon="Plus" @click="addShop" circle class="mobile-add-btn" />
+      </div>
     </div>
 
     <!-- 主要布局 -->
@@ -18,6 +26,9 @@
         <!-- 桌面端头部 -->
         <div v-if="!isMobile" class="sidebar-header" :class="{ collapsed: sidebarCollapsed }">
           <h2 v-if="!sidebarCollapsed">未境美食地图</h2>
+          <div v-if="!sidebarCollapsed" class="header-actions">
+            <ThemeToggle />
+          </div>
         </div>
 
         <!-- 侧边栏内容 -->
@@ -53,6 +64,10 @@
 
       <!-- 地图区域 -->
       <div class="map-area">
+        <!-- 全局搜索栏 -->
+        <div class="search-overlay" :class="{ 'mobile-search': isMobile }">
+          <GlobalSearch />
+        </div>
         <MapView />
       </div>
     </div>
@@ -69,7 +84,7 @@
 <script>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
-import { Menu, Plus, ArrowLeft, ArrowRight, Fold, ArrowDown, ArrowUp } from "@element-plus/icons-vue";
+import { Menu, Plus, ArrowLeft, ArrowRight, ArrowDown, ArrowUp } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
 
@@ -79,6 +94,8 @@ import CategoryFilter from "@/components/CategoryFilter.vue";
 import ShopList from "@/components/ShopList.vue";
 import ShopForm from "@/components/ShopForm.vue";
 import CategoryForm from "@/components/CategoryForm.vue";
+import GlobalSearch from "@/components/GlobalSearch.vue";
+import ThemeToggle from "@/components/ThemeToggle.vue";
 
 export default {
   name: "FoodMapView",
@@ -88,6 +105,8 @@ export default {
     ShopList,
     ShopForm,
     CategoryForm,
+    GlobalSearch,
+    ThemeToggle,
   },
 
   setup() {
@@ -179,27 +198,74 @@ export default {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f7fa;
+  background: var(--bg-secondary);
+  position: relative;
+  overflow: hidden;
 }
 
-.left-toolbar {
+/* 移动端顶部工具栏 */
+.mobile-header {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--gray-200);
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
   z-index: 1002;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+}
+
+.mobile-header-left,
+.mobile-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.mobile-header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mobile-menu-btn,
+.mobile-add-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.mobile-menu-btn:hover,
+.mobile-add-btn:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
 }
 
 .main-layout {
   flex: 1;
   display: flex;
   overflow: hidden;
+  position: relative;
 }
 
 .main-layout.mobile {
   position: relative;
+  padding-top: 60px; /* 为移动端顶部工具栏留出空间 */
 }
 
 .sidebar:not(.mobile) {
@@ -207,47 +273,64 @@ export default {
   top: 0;
   right: 0;
   height: 100%;
-  width: 350px;
-  background: white;
-  border-right: 1px solid #ebeef5;
+  width: 380px;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--gray-200);
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+  transition: all var(--transition-normal);
   z-index: 100;
-  /* overflow: hidden; */
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(20px);
   will-change: transform;
 }
 
 .sidebar-button:not(.mobile) {
   position: absolute;
   top: 50%;
-  left: -40px;
-  width: 40px;
-  height: 40px;
+  left: -48px;
+  width: 48px;
+  height: 48px;
   transform: translateY(-50%);
-  background-color: #fff;
-  border-radius: 50% 0 0 50%;
+  background: var(--bg-primary);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+  box-shadow: var(--shadow-lg);
+  color: var(--text-primary);
+  transition: all var(--transition-normal);
+  z-index: 101;
+}
+
+.sidebar-button:not(.mobile):hover {
+  background: var(--primary-gradient);
+  color: var(--text-inverse);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .sidebar:not(.mobile).collapsed {
   width: 0;
-  height: 40px;
+  height: 48px;
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  border-radius: 50% 0 0 50%;
+  border-radius: var(--radius-full) 0 0 var(--radius-full);
+  box-shadow: var(--shadow-lg);
 }
 
 .sidebar.mobile {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 60px; /* 在移动端顶部工具栏下方 */
   left: 0;
   right: auto;
-  height: 100%;
-  width: 300px;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  height: calc(100vh - 60px);
+  width: 320px;
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-2xl);
   transform: translateX(-100%);
   z-index: 1001;
+  border-radius: 0 var(--radius-2xl) var(--radius-2xl) 0;
+  transition: transform var(--transition-normal);
+  overflow-y: auto;
 }
 
 .sidebar.mobile:not(.collapsed) {
@@ -258,16 +341,43 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  border-bottom: 1px solid #ebeef5;
-  min-height: 60px;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--gray-200);
+  min-height: 80px;
+  background: var(--primary-gradient);
+  color: var(--text-inverse);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="50" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="30" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.3;
 }
 
 .sidebar-header h2 {
   margin: 0;
-  font-size: 16px;
-  color: #303133;
+  font-size: 18px;
+  font-weight: 700;
   white-space: nowrap;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+.header-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .sidebar-content {
@@ -275,33 +385,64 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: var(--bg-primary);
 }
 
 .quick-actions {
-  padding: 16px;
-  border-bottom: 1px solid #ebeef5;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--gray-200);
+  background: var(--bg-secondary);
+}
+
+.quick-actions .el-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.quick-actions .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .category-filter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 16px 8px;
-  border-bottom: 1px solid #ebeef5;
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-md);
+  border-bottom: 1px solid var(--gray-200);
+  background: var(--bg-primary);
 }
 
 .category-filter-header h3 {
   margin: 0;
-  font-size: 14px;
-  font-weight: bold;
-  color: #303133;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.category-filter-header h3::before {
+  content: '🏷️';
+  font-size: 18px;
+}
+
+.category-filter-header .el-button {
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
 }
 
 .shop-list-container {
   flex: 1;
   overflow: hidden;
-  padding: 16px;
+  padding: var(--spacing-xl);
   height: calc(100% - 60px);
+  background: var(--bg-primary);
 }
 
 .map-area {
@@ -309,46 +450,159 @@ export default {
   position: relative;
   overflow: hidden;
   width: 100%;
+  background: var(--bg-tertiary);
+}
+
+.search-overlay {
+  position: absolute;
+  top: var(--spacing-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 90%;
+  max-width: 500px;
+  animation: slideUp var(--transition-normal) ease-out;
+}
+
+.search-overlay.mobile-search {
+  top: var(--spacing-md);
+  width: calc(100% - 2 * var(--spacing-md));
+  left: var(--spacing-md);
+  transform: none;
 }
 
 .mobile-overlay {
-  position: absolute;
-  top: 0;
+  position: fixed;
+  top: 60px; /* 在移动端顶部工具栏下方 */
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   z-index: 1000;
+  animation: fadeIn var(--transition-fast) ease-out;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .sidebar:not(.mobile) {
-    width: 300px;
+    width: 320px;
   }
 
   .sidebar.collapsed:not(.mobile) {
     width: 0;
-    border-right: none;
+    border-left: none;
+  }
+
+  .mobile-header {
+    height: 56px;
+    padding: 0 var(--spacing-sm);
+  }
+
+  .mobile-title {
+    font-size: 15px;
+  }
+
+  .mobile-menu-btn,
+  .mobile-add-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .main-layout.mobile {
+    padding-top: 56px;
+  }
+
+  .sidebar.mobile {
+    top: 56px;
+    height: calc(100vh - 56px);
+    width: 300px;
+  }
+
+  .mobile-overlay {
+    top: 56px;
   }
 }
 
 @media (max-width: 480px) {
+  .mobile-header {
+    height: 52px;
+    padding: 0 var(--spacing-xs);
+  }
+
+  .mobile-title {
+    font-size: 14px;
+  }
+
+  .mobile-menu-btn,
+  .mobile-add-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .main-layout.mobile {
+    padding-top: 52px;
+  }
+
   .sidebar.mobile {
+    top: 52px;
+    height: calc(100vh - 52px);
     width: 280px;
   }
 
-  .mobile-toolbar {
-    padding: 8px 12px;
+  .mobile-overlay {
+    top: 52px;
   }
 
-  .mobile-toolbar h2 {
-    font-size: 16px;
+  .sidebar-header {
+    padding: var(--spacing-md);
+    min-height: 60px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 15px;
+  }
+
+  .quick-actions {
+    padding: var(--spacing-md);
+  }
+
+  .shop-list-container {
+    padding: var(--spacing-md);
   }
 }
 
 /* 动画效果 */
 .sidebar {
-  transition: transform 0.3s ease;
+  transition: all var(--transition-normal);
+}
+
+/* 进入动画 */
+.food-map-view {
+  animation: fadeIn var(--transition-slow) ease-out;
+}
+
+/* 悬浮效果 */
+.sidebar:not(.mobile):not(.collapsed):hover {
+  box-shadow: var(--shadow-2xl);
+}
+
+/* 加载状态 */
+.loading-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  color: var(--text-secondary);
+}
+
+.loading-state .loading-spinner {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
 }
 </style>

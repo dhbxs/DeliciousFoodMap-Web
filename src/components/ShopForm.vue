@@ -304,12 +304,166 @@ export default {
 
 <style scoped>
 .coordinate-hint {
-  margin-top: 5px;
+  margin-top: var(--spacing-sm);
+  font-size: 13px;
+  color: var(--text-tertiary);
+  line-height: 1.4;
 }
 
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-lg);
+}
+
+/* 移动端适配 */
+:deep(.el-dialog) {
+  margin: var(--spacing-lg);
+  max-width: calc(100vw - 2 * var(--spacing-lg));
+}
+
+:deep(.el-dialog__header) {
+  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+:deep(.el-dialog__body) {
+  padding: var(--spacing-xl);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+:deep(.el-form-item) {
+  margin-bottom: var(--spacing-lg);
+}
+
+:deep(.el-form-item__label) {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+:deep(.el-input__wrapper) {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+:deep(.el-input__wrapper):hover {
+  box-shadow: var(--shadow-md);
+}
+
+:deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+:deep(.el-textarea__inner) {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+:deep(.el-select) {
+  width: 100%;
+}
+
+:deep(.el-select .el-input__wrapper) {
+  border-radius: var(--radius-lg);
+}
+
+.dialog-footer .el-button {
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  padding: var(--spacing-md) var(--spacing-xl);
+  transition: all var(--transition-fast);
+}
+
+.dialog-footer .el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 移动端响应式 */
+@media (max-width: 768px) {
+  :deep(.el-dialog) {
+    margin: var(--spacing-md);
+    max-width: calc(100vw - 2 * var(--spacing-md));
+    border-radius: var(--radius-xl);
+  }
+
+  :deep(.el-dialog__header) {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  :deep(.el-dialog__title) {
+    font-size: 16px;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: var(--spacing-lg);
+    max-height: 50vh;
+  }
+
+  :deep(.el-form-item) {
+    margin-bottom: var(--spacing-md);
+  }
+
+  :deep(.el-form-item__label) {
+    font-size: 14px;
+  }
+
+  .dialog-footer {
+    gap: var(--spacing-sm);
+    flex-direction: column-reverse;
+  }
+
+  .dialog-footer .el-button {
+    width: 100%;
+    height: 44px;
+    font-size: 15px;
+  }
+
+  .coordinate-hint {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  :deep(.el-dialog) {
+    margin: var(--spacing-sm);
+    max-width: calc(100vw - 2 * var(--spacing-sm));
+    max-height: calc(100vh - 2 * var(--spacing-sm));
+  }
+
+  :deep(.el-dialog__header) {
+    padding: var(--spacing-md);
+  }
+
+  :deep(.el-dialog__title) {
+    font-size: 15px;
+  }
+
+  :deep(.el-dialog__body) {
+    padding: var(--spacing-md);
+    max-height: calc(100vh - 200px);
+  }
+
+  :deep(.el-form-item__label) {
+    font-size: 13px;
+  }
+
+  .dialog-footer .el-button {
+    height: 40px;
+    font-size: 14px;
+  }
 }
 </style>
