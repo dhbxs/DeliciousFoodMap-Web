@@ -20,7 +20,7 @@
           </svg>
         </div>
         <span class="category-name">{{ category.name }}</span>
-        <span class="category-count">({{ getCategoryCount(category.name) }})</span>
+        <span class="category-count">({{ category.num }})</span>
       </div>
     </div>
 
