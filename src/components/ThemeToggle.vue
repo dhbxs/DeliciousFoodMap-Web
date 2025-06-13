@@ -81,6 +81,11 @@ export default {
   position: relative;
 }
 
+.el-button.is-circle {
+  width: 40px;
+  height: 40px;
+}
+
 .theme-button {
   width: 48px;
   height: 48px;

@@ -289,6 +289,12 @@ export default {
 </script>
 
 <style scoped>
+
+.el-button.is-circle {
+  width: 40px;
+  height: 40px;
+}
+
 .shop-list {
   height: 100%;
   display: flex;
@@ -385,7 +391,7 @@ export default {
 .refresh-button {
   border-radius: var(--radius-full);
   width: 48px;
-  height: 48px;
+  height: 50px;
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
 }

@@ -273,7 +273,7 @@ export default {
   top: 0;
   right: 0;
   height: 100%;
-  width: 380px;
+  width: 450px;
   background: var(--bg-primary);
   border-left: 1px solid var(--gray-200);
   display: flex;
@@ -343,7 +343,8 @@ export default {
   justify-content: center;
   padding: var(--spacing-xl);
   border-bottom: 1px solid var(--gray-200);
-  min-height: 80px;
+  /* min-height: 80px; */
+  height: 80px;
   background: var(--primary-gradient);
   color: var(--text-inverse);
   position: relative;
