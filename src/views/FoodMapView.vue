@@ -33,18 +33,9 @@
 
         <!-- 侧边栏内容 -->
         <div class="sidebar-content" v-show="!sidebarCollapsed || isMobile">
-          <!-- 快速操作 -->
-          <div class="quick-actions">
-            <el-button type="primary" @click="addShop" style="width: 100%">
-              <el-icon>
-                <Plus />
-              </el-icon>
-              添加店铺
-            </el-button>
-          </div>
 
           <!-- 分类筛选 -->
-          <div class="category-filter-header">
+          <div class="category-filter-header" :class="{ collapsed: categoryFilterCollapsed }">
             <h3>分类筛选</h3>
             <el-button
               :icon="categoryFilterCollapsed ? ArrowDown : ArrowUp"
@@ -413,10 +404,13 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-md);
-  border-bottom: 1px solid var(--gray-200);
-  background: var(--bg-primary);
+  padding: var(--spacing-md);
 }
+
+.category-filter-header.collapsed {
+  border-bottom: 1px solid var(--gray-200);
+}
+
 
 .category-filter-header h3 {
   margin: 0;
@@ -441,9 +435,7 @@ export default {
 .shop-list-container {
   flex: 1;
   overflow: hidden;
-  padding: var(--spacing-xl);
   height: calc(100% - 60px);
-  background: var(--bg-primary);
 }
 
 .map-area {

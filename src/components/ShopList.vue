@@ -8,27 +8,6 @@
         </el-tag>
       </div>
     </div>
-    <div class="search-bar">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索店铺名称或地址..."
-        clearable
-        @input="handleSearchInput"
-      >
-        <template #prefix>
-          <el-icon><Search /></el-icon>
-        </template>
-      </el-input>
-      <el-button
-        class="refresh-button"
-        type="primary"
-        :icon="Refresh"
-        circle
-        @click="fetchInitialData"
-        title="刷新店铺列表"
-      />
-    </div>
-
     <div class="shop-items" v-if="displayShops.length > 0">
       <div
         v-for="shop in displayShops"
@@ -40,13 +19,15 @@
         <div class="shop-header">
           <div
             class="shop-category"
-            :style="{ backgroundColor: getCategoryColor(shop.category) }"
+            :style="{ backgroundColor: shop.categoryColor }"
           >
-            {{ getCategoryIcon(shop.category) }}
+            <svg class="icon" aria-hidden="true" style="font-size: 30px;">
+              <use :xlink:href="shop.categoryIcon"></use>
+            </svg>
           </div>
           <div class="shop-info">
             <h4 class="shop-name">{{ shop.name }}</h4>
-            <p class="shop-category-text">{{ shop.category }}</p>
+            <p class="shop-category-text">{{ shop.categoryName }}</p>
           </div>
           <div class="shop-actions">
             <el-button
@@ -74,6 +55,7 @@
             {{ shop.address }}
           </p>
           <p class="shop-description" v-if="shop.description">
+            <ChatRound style="width: 1em; height: 1em;"/>
             {{ shop.description }}
           </p>
           <div class="shop-meta">
@@ -300,9 +282,6 @@ export default {
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--gray-200);
   overflow: hidden;
   transition: all var(--transition-normal);
 }
@@ -315,9 +294,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-xl);
-  border-bottom: 1px solid var(--gray-200);
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  padding: var(--spacing-md);
   position: relative;
 }
 
@@ -362,43 +339,6 @@ export default {
   font-weight: 600;
   padding: var(--spacing-sm) var(--spacing-md);
   box-shadow: var(--shadow-sm);
-}
-
-.search-bar {
-  padding: var(--spacing-xl);
-  border-bottom: 1px solid var(--gray-200);
-  display: flex;
-  gap: var(--spacing-md);
-  background: var(--bg-secondary);
-}
-
-.search-bar .el-input {
-  flex: 1;
-}
-
-.search-bar .el-input :deep(.el-input__wrapper) {
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-  border: 1px solid var(--gray-200);
-}
-
-.search-bar .el-input :deep(.el-input__wrapper):hover {
-  box-shadow: var(--shadow-md);
-  border-color: var(--primary-color);
-}
-
-.refresh-button {
-  border-radius: var(--radius-full);
-  width: 48px;
-  height: 50px;
-  box-shadow: var(--shadow-md);
-  transition: all var(--transition-normal);
-}
-
-.refresh-button:hover {
-  transform: rotate(180deg) scale(1.1);
-  box-shadow: var(--shadow-lg);
 }
 
 .shop-items {
@@ -520,6 +460,7 @@ export default {
   width: 32px;
   height: 32px;
   padding: 0;
+  color: #fff;
   transition: all var(--transition-fast);
 }
 
@@ -554,9 +495,8 @@ export default {
   color: var(--text-tertiary);
   line-height: 1.5;
   background: var(--gray-50);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm);
   border-radius: var(--radius-md);
-  border-left: 3px solid var(--primary-color);
 }
 
 .shop-meta {

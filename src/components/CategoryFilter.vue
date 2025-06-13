@@ -1,7 +1,6 @@
 <template>
   <div class="category-filter">
     <div class="filter-header">
-      <h3></h3>
       <div class="filter-actions">
         <el-button size="small" @click="clearFilters" :disabled="selectedCategories.length === 0">
           清空
@@ -134,12 +133,9 @@ export default {
 
 <style scoped>
 .category-filter {
-  padding: var(--spacing-xl);
+  padding: 10px 0 0 0;
   background: var(--bg-primary);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--gray-200);
-  transition: all var(--transition-normal);
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .category-filter:hover {
@@ -150,7 +146,6 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xl);
 }
 
 .filter-header h3 {
@@ -162,7 +157,10 @@ export default {
 
 .filter-actions {
   display: flex;
+  justify-content: space-around;
+  width: 100%;
   gap: var(--spacing-sm);
+  padding: 0 10px;
 }
 
 .filter-actions .el-button {
@@ -179,13 +177,11 @@ export default {
 
 .category-list {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   gap: var(--spacing-md);
-  max-height: 240px;
+  max-height: 230px;
   overflow-y: auto;
-  padding: var(--spacing-sm);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-lg);
+  margin: 10px 10px 0 10px;
 }
 
 .category-item {
@@ -219,8 +215,6 @@ export default {
 .category-item:hover {
   background: var(--bg-primary);
   border-color: var(--primary-color);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
 .category-item.active {
@@ -274,9 +268,7 @@ export default {
 }
 
 .filter-footer {
-  margin-top: var(--spacing-xl);
-  padding-top: var(--spacing-xl);
-  border-top: 1px solid var(--gray-200);
+  padding: var(--spacing-md);
 }
 
 .filter-footer .el-button {
