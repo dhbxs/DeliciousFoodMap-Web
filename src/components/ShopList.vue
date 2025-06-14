@@ -131,8 +131,16 @@ export default {
       () => store.getters["shops/currentCategoryFilter"]
     );
 
-    watch(currentCategoryFilter, (newFilter) => {
-      shopService.setFilteredCategories(newFilter);
+    watch(currentCategoryFilter, async (newFilter) => {
+        // 调用店铺搜索接口，获取筛选后的店铺列表
+        // TODO 需要支持查询多个分类一起传递
+        const result = await shopService.getShops({
+          pageNum: 1,
+          pageSize: 100,
+          categoryId: newFilter[0]
+        }, true); 
+        shopsTotal.value = result.total || 0;
+        shops.value = result.records || [];
     });
 
     // 获取分类颜色

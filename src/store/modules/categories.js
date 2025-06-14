@@ -65,8 +65,8 @@ export default {
     },
 
     // 切换单个分类选择
-    toggleCategory({ commit, dispatch, state }, categoryName) {
-      commit("TOGGLE_CATEGORY", categoryName);
+    toggleCategory({ commit, dispatch, state }, categoryId) {
+      commit("TOGGLE_CATEGORY", categoryId);
       // 通知店铺模块更新筛选
       dispatch("shops/onCategoryFilterChanged", state.selectedCategories, { root: true });
     },

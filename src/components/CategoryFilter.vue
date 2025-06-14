@@ -13,7 +13,7 @@
     </div>
     <div class="category-list">
       <div v-for="category in categories" :key="category.id" class="category-item"
-        :class="{ active: isSelected(category.name) }" @click="toggleCategory(category.name)">
+        :class="{ active: isSelected(category.name) }" @click="toggleCategory(category.id)">
         <div class="category-icon" :style="{ backgroundColor: category.color }">
           <svg class="icon" aria-hidden="true" style="font-size: 30px;">
             <use :xlink:href="category.icon"></use>
@@ -97,8 +97,8 @@ export default {
     };
 
     // 切换分类选择
-    const toggleCategory = (categoryName) => {
-      store.dispatch("categories/toggleCategory", categoryName);
+    const toggleCategory = (categoryId) => {
+      store.dispatch("categories/toggleCategory", categoryId);
     };
 
     // 清空筛选
