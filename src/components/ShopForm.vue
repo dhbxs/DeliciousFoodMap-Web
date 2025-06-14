@@ -24,9 +24,9 @@
         />
       </el-form-item>
 
-      <el-form-item label="分类" prop="category">
+      <el-form-item label="分类" prop="categoryId">
         <el-select
-          v-model="form.category"
+          v-model="form.categoryId"
           placeholder="请选择分类"
           style="width: 100%"
           filterable
@@ -36,7 +36,7 @@
             v-for="category in categories"
             :key="category.id"
             :label="category.name"
-            :value="category.name"
+            :value="category.id"
           >
             <span>{{ category.icon }} {{ category.name }}</span>
           </el-option>
@@ -168,7 +168,7 @@ export default {
       form.value = {
         name: "",
         address: "",
-        category: "",
+        categoryId: "",
         description: "",
         lat: null,
         lng: null,
@@ -187,7 +187,7 @@ export default {
           form.value = {
             name: shop.name,
             address: shop.address,
-            category: shop.category,
+            categoryId: shop.categoryId,
             description: shop.description,
             lat: shop.latitude || shop.lat,
             lng: shop.longitude || shop.lng,
