@@ -134,11 +134,22 @@ export default {
     watch(currentCategoryFilter, async (newFilter) => {
         // 调用店铺搜索接口，获取筛选后的店铺列表
         // TODO 需要支持查询多个分类一起传递
-        const result = await shopService.getShops({
+        let params = {
           pageNum: 1,
           pageSize: 100,
-          categoryId: newFilter[0]
-        }, true); 
+        };
+
+
+        if (newFilter.length === 0) {
+          // 如果没有选择分类，则返回所有店铺
+          const result = await shopService.getShops(params, true);
+          shopsTotal.value = result.total || 0;
+          shops.value = result.records || [];
+          return;
+        }
+
+        params.categoryId = newFilter.join(",");
+        const result = await shopService.getShops(params, true); 
         shopsTotal.value = result.total || 0;
         shops.value = result.records || [];
     });

@@ -419,6 +419,26 @@ export default {
 
   :deep(.el-form-item__label) {
     font-size: 14px;
+    width: auto !important;
+    float: none;
+    display: block;
+    margin-bottom: 8px;
+    text-align: left;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-select) {
+    width: 100%;
+  }
+
+  :deep(.el-col) {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  :deep(.el-col:last-child) {
+    margin-bottom: 0;
   }
 
   .dialog-footer {
@@ -430,6 +450,7 @@ export default {
     width: 100%;
     height: 44px;
     font-size: 15px;
+    padding: 12px 16px;
   }
 
   .coordinate-hint {
@@ -459,11 +480,31 @@ export default {
 
   :deep(.el-form-item__label) {
     font-size: 13px;
+    width: auto !important;
+    float: none;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-select) {
+    width: 100%;
+  }
+
+  :deep(.el-col) {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  :deep(.el-col:last-child) {
+    margin-bottom: 0;
   }
 
   .dialog-footer .el-button {
-    height: 40px;
+    height: 44px;
     font-size: 14px;
+    padding: 12px 16px;
   }
 }
 </style>

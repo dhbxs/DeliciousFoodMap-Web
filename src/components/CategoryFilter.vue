@@ -2,10 +2,10 @@
   <div class="category-filter">
     <div class="filter-header">
       <div class="filter-actions">
-        <el-button size="small" @click="clearFilters" :disabled="selectedCategories.length === 0">
+        <el-button size="medium" @click="clearFilters" :disabled="selectedCategories.length === 0">
           清空
         </el-button>
-        <el-button size="small" type="primary" @click="selectAll"
+        <el-button size="medium" type="primary" @click="selectAll"
           :disabled="selectedCategories.length === categories.length">
           全选
         </el-button>
@@ -108,8 +108,8 @@ export default {
 
     // 全选
     const selectAll = () => {
-      const allCategoryNames = categories.value.map((cat) => cat.name);
-      store.dispatch("categories/selectAllCategories", allCategoryNames);
+      const allCategoryIds = categories.value.map((cat) => cat.id);
+      store.dispatch("categories/selectAllCategories", allCategoryIds);
     };
 
     // 显示分类管理器
@@ -157,7 +157,7 @@ export default {
 
 .filter-actions {
   display: flex;
-  justify-content: space-around;
+  justify-content: flex-start;
   width: 100%;
   gap: var(--spacing-sm);
   padding: 0 10px;
