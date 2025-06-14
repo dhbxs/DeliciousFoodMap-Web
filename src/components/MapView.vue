@@ -358,6 +358,19 @@ export default {
   gap: 10px;
 }
 
+/* 编写一个适配移动端的 .map-controls */
+@media (max-width: 768px) {
+  .map-controls {
+    position: absolute;
+    top: 100px;
+    left: 10px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
 .map-controls .el-button+.el-button {
   margin-left: 0;
 }

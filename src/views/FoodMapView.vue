@@ -10,7 +10,7 @@
       </div>
       <div class="mobile-header-right">
         <ThemeToggle />
-        <el-button type="primary" :icon="Plus" @click="addShop" circle class="mobile-add-btn" />
+        <!-- <el-button type="primary" :icon="Plus" @click="addShop" circle class="mobile-add-btn" /> -->
       </div>
     </div>
 
