@@ -79,10 +79,10 @@ export default {
     },
 
     // 全选分类
-    selectAllCategories({ commit, dispatch }, allCategoryNames) {
-      commit("SET_SELECTED_CATEGORIES", allCategoryNames);
+    selectAllCategories({ commit, dispatch }, allCategoryIds) {
+      commit("SET_SELECTED_CATEGORIES", allCategoryIds);
       // 通知店铺模块更新筛选
-      dispatch("shops/onCategoryFilterChanged", allCategoryNames, { root: true });
+      dispatch("shops/onCategoryFilterChanged", allCategoryIds, { root: true });
     },
 
     // 切换分类筛选器展开状态

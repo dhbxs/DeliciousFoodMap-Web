@@ -336,7 +336,7 @@ export default {
   }
 
   .filter-actions {
-    display: grid;
+    /* display: grid; */
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-sm);
   }
