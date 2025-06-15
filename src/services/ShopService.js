@@ -169,7 +169,7 @@ class ShopService {
         name: shopData.name,
         address: shopData.address,
         description: shopData.description || "",
-        category: shopData.category,
+        categoryId: shopData.categoryId,
         longitude: shopData.lng,
         latitude: shopData.lat,
         isDelete: "N"
@@ -215,7 +215,7 @@ class ShopService {
         name: shopData.name,
         address: shopData.address,
         description: shopData.description || "",
-        category: shopData.category,
+        categoryId: shopData.categoryId,
         longitude: shopData.lng,
         latitude: shopData.lat,
         isDelete: "N"

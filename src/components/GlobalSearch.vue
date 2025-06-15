@@ -55,8 +55,8 @@
           <div class="result-content">
             <div class="result-header">
               <span class="result-name">{{ result.name }}</span>
-              <span class="result-category" :style="{ color: getCategoryColor(result.category) }">
-                {{ getCategoryIcon(result.category) }} {{ result.category }}
+              <span class="result-category" :style="{ color: getCategoryColor(result.categoryColor) }">
+                {{ getCategoryIcon(result.category) }} {{ result.categoryName }}
               </span>
             </div>
             <div class="result-address">
