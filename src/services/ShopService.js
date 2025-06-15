@@ -317,8 +317,16 @@ class ShopService {
    * @param {string} id - Shop ID
    * @returns {Object|null} Shop object or null
    */
-  getShopById(id) {
-    return this.shops.value.find(shop => shop.id === id) || null
+  async getShopById(id) {
+    // Check reactive data first
+    let shop = await getPoiData({ id }).then(response => {
+      let records = response.data.records
+      if (records && records.length > 0) {
+        return records[0]
+      }
+      return null;
+    });
+    return shop;
   }
 
   /**

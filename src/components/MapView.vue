@@ -60,9 +60,8 @@ export default {
 
     // 创建自定义标记内容
     const createCustomMarkerContent = (category) => {
-      const categoryData = categoryService.getCategoryByName(category);
-      const color = categoryData?.color || "#409eff";
-      const icon = categoryData?.icon || "#food-icon-a-001-drink";
+      const color = category?.categoryColor || "#409eff";
+      const icon = category?.categoryIcon || "#food-icon-a-001-drink";
 
       return `
         <div style="
@@ -173,21 +172,40 @@ export default {
         // 创建自定义标记
         const marker = new window.AMap.Marker({
           position: [lng, lat], // 高德地图使用[lng, lat]格式
-          content: createCustomMarkerContent(shop.category),
+          content: createCustomMarkerContent(shop),
           offset: new window.AMap.Pixel(-15, -15), // 标记偏移量
         });
 
-        // 创建信息窗体
+        // 创建信息窗体 (优化样式 - 简化结构)
         const infoWindow = new window.AMap.InfoWindow({
           content: `
-            <div class="shop-popup">
-              <h4>${shop.name}</h4>
-              <p><strong>分类:</strong> ${shop.category}</p>
-              <p><strong>地址:</strong> ${shop.address}</p>
-              <p><strong>描述:</strong> ${shop.description}</p>
-              <div class="popup-actions">
-                <button onclick="editShop(${shop.id})" class="edit-btn">编辑</button>
-                <button onclick="deleteShop(${shop.id})" class="delete-btn">删除</button>
+            <div class="amap-info-window">
+              <h4 class="shop-title">${shop.name}</h4>
+              <div class="detail-item">
+                <span class="detail-label">分类:</span>
+                <span class="detail-value">${shop.categoryName}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">地址:</span>
+                <span class="detail-value">${shop.address}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">描述:</span>
+                <span class="detail-value">${shop.description}</span>
+              </div>
+              <div class="shop-actions">
+                <button
+                  onclick="editShop(${shop.id})"
+                  class="el-button el-button--primary"
+                >
+                  编辑
+                </button>
+                <button
+                  onclick="deleteShop(${shop.id})"
+                  class="el-button el-button--danger"
+                >
+                  删除
+                </button>
               </div>
             </div>
           `,
@@ -229,7 +247,7 @@ export default {
           showButton: false, // 不显示定位按钮
           buttonPosition: "LB", // 定位按钮停靠位置
           showMarker: true, // 定位成功后在定位到的位置显示点标记
-          showCircle: true, // 定位成功后用圆圈表示定位精度范围
+          showCircle: false, // 定位成功后用圆圈表示定位精度范围
           panToLocation: true, // 定位成功后将定位到的位置作为地图中心点
           zoomToAccuracy: true, // 定位成功后调整地图视野范围使定位位置及精度范围视野内可见
         });
@@ -385,43 +403,67 @@ export default {
   font-family: inherit;
 }
 
-/* 弹窗样式 */
-:deep(.shop-popup) {
-  min-width: 200px;
+/* AMAP信息窗体样式 - 简化结构 */
+:deep(.amap-info-window) {
+  background: var(--el-bg-color);
+  border-radius: 12px;
+  box-shadow: var(--el-box-shadow-light);
+  padding: 20px;
+  max-width: 320px;
+  font-family: var(--el-font-family);
+  color: var(--el-text-color-primary);
+  border: 1px solid var(--el-border-color);
 }
 
-:deep(.shop-popup h4) {
-  margin: 0 0 10px 0;
-  color: #409eff;
+:deep(.amap-info-window .shop-title) {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--el-border-color);
 }
 
-:deep(.shop-popup p) {
-  margin: 5px 0;
-  font-size: 12px;
-}
-
-:deep(.popup-actions) {
-  margin-top: 10px;
+:deep(.amap-info-window .detail-item) {
   display: flex;
-  gap: 5px;
+  margin: 12px 0;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-:deep(.edit-btn),
-:deep(.delete-btn) {
-  padding: 4px 8px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
+:deep(.amap-info-window .detail-label) {
+  flex: 0 0 60px;
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
 }
 
-:deep(.edit-btn) {
-  background-color: #409eff;
-  color: white;
+:deep(.amap-info-window .detail-value) {
+  flex: 1;
+  color: var(--el-text-color-primary);
 }
 
-:deep(.delete-btn) {
-  background-color: #f56c6c;
-  color: white;
+:deep(.amap-info-window .shop-actions) {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--el-border-color-light);
+}
+
+/* 按钮悬停效果 */
+:deep(.amap-info-window .el-button) {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+:deep(.amap-info-window .el-button:hover) {
+  opacity: 0.85;
+}
+
+.amap-info-content .amap-info-outer {
+  padding: 0 0 0 0 !important;
 }
 </style>

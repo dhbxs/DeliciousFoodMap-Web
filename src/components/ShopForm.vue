@@ -180,9 +180,9 @@ export default {
     };
 
     // 加载编辑数据
-    const loadEditData = () => {
+    const loadEditData = async () => {
       if (isEditing.value && editingShopId.value) {
-        const shop = shopService.getShopById(editingShopId.value);
+        const shop = await shopService.getShopById(editingShopId.value);
         if (shop) {
           form.value = {
             name: shop.name,
@@ -277,7 +277,6 @@ export default {
       if (newVal) {
         nextTick(() => {
           loadEditData();
-
           // 如果有临时坐标，使用它们
           if (tempCoordinates.value) {
             form.value.lat = tempCoordinates.value.lat;
