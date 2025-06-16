@@ -256,7 +256,7 @@ export default {
   background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent);
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   padding: 64px 32px;
 }
@@ -454,21 +454,395 @@ export default {
 }
 
 /* 响应式设计 */
+/* 平板设备 */
+@media (max-width: 1024px) {
+  .right-section {
+    padding: 32px 48px;
+  }
+}
+
+/* 移动设备 */
 @media (max-width: 768px) {
   .login-container {
-    flex-direction: column;
+    position: relative;
+    min-height: 100vh;
+    background-image: url('https://ai-public.mastergo.com/ai/img_res/aca63b1356cd6e5d69f9ce3148fca942.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  
+  .login-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8));
+    z-index: 1;
   }
   
   .left-section {
-    height: 200px;
+    display: none;
   }
   
   .right-section {
-    padding: 24px;
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    padding: 30px 20px 10px;
+    flex: 1;
+    min-height: 100vh;
+    height: auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    padding-top: 80px;
+  }
+  
+  .header {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    right: 24px;
+    margin-bottom: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 3;
+  }
+  
+  .logo {
+    font-size: 1.3rem;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  
+  .home-link {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  }
+  
+  .home-link:hover {
+    color: white;
   }
   
   .form-container {
-    max-width: none;
+    max-width: min(400px, 92%);
+    width: 100%;
+    margin: 0 auto 10px;
+    background: rgba(26, 26, 26, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .form-header {
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  
+  .form-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+    color: white;
+  }
+  
+  .form-header p {
+    font-size: 15px;
+    color: #9ca3af;
+  }
+  
+  .register-form {
+    margin-bottom: 16px;
+  }
+  
+  .form-input {
+    margin-bottom: 16px;
+  }
+  
+  :deep(.form-input .el-input__wrapper) {
+    padding: 12px 16px;
+    background: rgba(31, 41, 55, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .divider-section {
+    margin: 16px 0;
+  }
+  
+  .social-buttons {
+    margin-bottom: 0;
+  }
+}
+
+/* 小屏幕移动设备 */
+@media (max-width: 480px) {
+  .left-section {
+    height: 35vh;
+    min-height: 250px;
+    max-height: 300px;
+  }
+  
+  .overlay {
+    padding: 30px 20px;
+  }
+  
+  .content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+  
+  .content p {
+    font-size: 1rem;
+  }
+  
+  .right-section {
+    padding: 16px 16px 5px;
+    min-height: auto;
+    padding-top: 65px;
+  }
+  
+  .form-container {
+    padding: 16px 16px;
+    margin-bottom: 5px;
+  }
+  
+  .header {
+    margin-bottom: 24px;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .logo {
+    font-size: 1.2rem;
+  }
+  
+  .home-link {
+    align-self: flex-end;
+    font-size: 13px;
+  }
+  
+  .form-header {
+    margin-bottom: 24px;
+  }
+  
+  .form-header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .form-header p {
+    font-size: 14px;
+  }
+  
+  .register-form {
+    margin-bottom: 24px;
+  }
+  
+  .form-input {
+    margin-bottom: 14px;
+  }
+  
+  .divider-section {
+    margin: 24px 0;
+  }
+  
+  .social-buttons {
+    margin-bottom: 24px;
+  }
+  
+  /* 优化表单行间距 */
+  :deep(.el-row) {
+    margin-left: -8px !important;
+    margin-right: -8px !important;
+  }
+  
+  :deep(.el-col) {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* 超小屏幕设备 */
+@media (max-width: 360px) {
+  .left-section {
+    height: 30vh;
+    min-height: 200px;
+    max-height: 250px;
+  }
+  
+  .overlay {
+    padding: 20px 16px;
+  }
+  
+  .content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+  }
+  
+  .content p {
+    font-size: 0.9rem;
+  }
+  
+  .right-section {
+    padding: 12px 10px 4px;
+    min-height: auto;
+    padding-top: 55px;
+  }
+  
+  .form-container {
+    padding: 12px 12px;
+    margin-bottom: 4px;
+  }
+  
+  .header {
+    margin-bottom: 20px;
+  }
+  
+  .logo {
+    font-size: 1.1rem;
+  }
+  
+  .form-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .form-header p {
+    font-size: 13px;
+  }
+  
+  .register-form {
+    margin-bottom: 20px;
+  }
+  
+  .divider-section {
+    margin: 20px 0;
+  }
+  
+  .social-buttons {
+    margin-bottom: 20px;
+  }
+}
+
+/* 横屏模式优化 */
+@media (max-width: 768px) and (orientation: landscape) and (max-height: 500px) {
+  .login-container {
+    flex-direction: row;
+  }
+  
+  .left-section {
+    height: 100vh;
+    min-height: 100vh;
+    flex: 0.4;
+    max-height: none;
+  }
+  
+  .overlay {
+    padding: 20px;
+    justify-content: center;
+  }
+  
+  .right-section {
+    height: 100vh;
+    padding-top: 60px;
+  }
+  
+  .form-container {
+    max-height: calc(100vh - 80px);
+    padding: 16px;
+  }
+  
+  .content h2 {
+    font-size: 1.6rem;
+  }
+  
+  .content p {
+    font-size: 0.9rem;
+  }
+  
+  .right-section {
+    flex: 0.6;
+    min-height: 100vh;
+    height: 100vh;
+    padding: 10px 14px 10px;
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding-top: 50px;
+  }
+  
+  .form-container {
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    padding: 16px 14px;
+    margin-bottom: 8px;
+  }
+  
+  .header {
+    margin-bottom: 16px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .form-header {
+    margin-bottom: 16px;
+  }
+  
+  .form-header h1 {
+    font-size: 1.4rem;
+  }
+  
+  .register-form {
+    margin-bottom: 16px;
+  }
+  
+  .divider-section {
+    margin: 16px 0;
+  }
+  
+  .social-buttons {
+    margin-bottom: 16px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .submit-button,
+  .social-button {
+    min-height: 48px;
+    font-size: 16px;
+  }
+  
+  .home-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    padding: 8px;
+  }
+  
+  .password-icon {
+    padding: 12px;
+    margin: -12px;
+    font-size: 18px;
+  }
+  
+  :deep(.el-checkbox__input) {
+    transform: scale(1.3);
+  }
+  
+  :deep(.form-input .el-input__wrapper) {
+    min-height: 48px;
+  }
+  
+  :deep(.form-input .el-input__inner) {
+    font-size: 16px;
   }
 }
 </style>
