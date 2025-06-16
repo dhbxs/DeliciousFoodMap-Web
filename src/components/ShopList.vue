@@ -602,17 +602,18 @@ export default {
 
   .list-header {
     padding: var(--spacing-lg);
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: flex-start;
     gap: var(--spacing-md);
   }
 
   .list-header h3 {
     text-align: center;
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .list-stats {
+    padding-top: 7px;
     text-align: center;
   }
 

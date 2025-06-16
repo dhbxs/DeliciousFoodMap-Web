@@ -56,8 +56,11 @@
             <div class="result-header">
               <span class="result-name">{{ result.name }}</span>
               <span class="result-category" :style="{ color: getCategoryColor(result.categoryColor) }">
-                {{ getCategoryIcon(result.category) }} {{ result.categoryName }}
+                <svg class="result-category-icon" aria-hidden="true">
+                  <use :xlink:href="result.categoryIcon"></use>
+                </svg>
               </span>
+              <span class="result-category">{{ result.categoryName }}</span>
             </div>
             <div class="result-address">
               <el-icon class="location-icon"><Location /></el-icon>
@@ -971,5 +974,10 @@ export default {
     height: 44px;
     font-size: 14px;
   }
+}
+.result-category-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: var(--spacing-xs);
 }
 </style>
