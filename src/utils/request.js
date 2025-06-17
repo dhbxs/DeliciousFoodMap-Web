@@ -15,7 +15,7 @@ const request = axios.create({
     baseURL: serverConfig.localURL,
     // 超时时间，单位（毫秒）
     timeout: 10000,
-    withCredentials: false
+    withCredentials: true
 })
 
 // 请求拦截器

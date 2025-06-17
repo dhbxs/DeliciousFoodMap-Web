@@ -55,7 +55,7 @@
                 </el-col>
               </el-row>
               -->
-              <el-form-item prop="nickname">
+              <el-form-item v-if="isRegister" prop="nickname">
                 <el-input v-model="form.nickname" placeholder="昵称" size="large" class="form-input" />
               </el-form-item>
               <el-form-item prop="email">
@@ -213,7 +213,7 @@ export default {
         if (isRegister.value) {
           // 注册请求
           const registerData = {
-            nickname: form.nickname,
+            nickName: form.nickname,
             email: form.email,
             password: form.password,
             verifyCode: form.verifyCode
