@@ -36,6 +36,13 @@ request.interceptors.request.use(function (config) {
 // 响应拦截器
 request.interceptors.response.use(function (response) {
     // 对响应数据做点什么
+    
+    // 如果是blob类型（如图片流），直接返回数据
+    if (response.config.responseType === 'blob') {
+        return response.data;
+    }
+    
+    // 处理普通JSON响应
     if (response.data.code != "200") {
         if (response.data.code == "5000" || response.data.code == "5001" || response.data.code == "5002") {
             localStorage.removeItem("user");
