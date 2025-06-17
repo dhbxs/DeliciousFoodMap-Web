@@ -540,7 +540,8 @@ export default {
   .sidebar.mobile {
     top: 52px;
     height: calc(100vh - 52px);
-    width: 280px;
+    width: 100%;
+    border-radius: 0;
   }
 
   .mobile-overlay {

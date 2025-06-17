@@ -209,7 +209,9 @@ export default {
               </div>
             </div>
           `,
-          offset: new window.AMap.Pixel(0, -30),
+          anchor: "bottom-center",
+          isCustom: true,
+          closeWhenClickMap: true,
         });
 
         // 标记点击事件
