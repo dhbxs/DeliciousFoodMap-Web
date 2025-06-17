@@ -3,6 +3,7 @@
  */
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import store from '@/store' // Import Vuex store
 
 const serverConfig = {
     localURL: process.env.VUE_APP_BACKEND_URL,
@@ -20,11 +21,17 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(function (config) {
-    // 在发送请求之前做什么
     if (serverConfig.useTokenAuthorization) {
-        let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
-        if (user) {
-            config.headers.authorization = "Bearer " + user.token;
+        // 优先从 Vuex 获取 token
+        const token = store.state.user.token;
+        if (token) {
+            config.headers.authorization = "Bearer " + token;
+        } else {
+            // 回退到 localStorage 获取 token
+            let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+            if (user && user.token) {
+                config.headers.authorization = "Bearer " + user.token;
+            }
         }
     }
     return config;
@@ -46,6 +53,9 @@ request.interceptors.response.use(function (response) {
     if (response.data.code != "200") {
         if (response.data.code == "5000" || response.data.code == "5001" || response.data.code == "5002") {
             localStorage.removeItem("user");
+            // 清除 Vuex 中的用户数据 (使用命名空间)
+            store.commit('user/SET_TOKEN', null);
+            store.commit('user/SET_USER', null);
             ElMessage({
                 showClose: true,
                 message: response.data.code + " | " + response.data.message,

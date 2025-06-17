@@ -41,20 +41,6 @@
             </div>
 
             <el-form :model="form" :rules="rules" ref="formRef" class="register-form">
-              <!--
-              <el-row v-if="isRegister" :gutter="16">
-                <el-col :span="12">
-                  <el-form-item prop="firstName">
-                    <el-input v-model="form.firstName" placeholder="姓氏" size="large" class="form-input" />
-                  </el-form-item>
-                </el-col>
-                <el-col :span="12">
-                  <el-form-item prop="lastName">
-                    <el-input v-model="form.lastName" placeholder="名字" size="large" class="form-input" />
-                  </el-form-item>
-                </el-col>
-              </el-row>
-              -->
               <el-form-item v-if="isRegister" prop="nickname">
                 <el-input v-model="form.nickname" placeholder="昵称" size="large" class="form-input" />
               </el-form-item>
@@ -112,6 +98,7 @@ import { ElMessage } from 'element-plus'
 import { ArrowRight, View, Hide, Platform, Apple } from '@element-plus/icons-vue'
 import { login, register, getCode } from '@/api/user';
 import { useRouter } from 'vue-router';
+import { useStore } from 'vuex'; // Add Vuex store
 
 export default {
   name: 'LoginPage',
@@ -124,10 +111,11 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const store = useStore() // Initialize Vuex store
     const formRef = ref()
     const showPassword = ref(false)
     const loading = ref(false)
-    const isRegister = ref(true)
+    const isRegister = ref(false)
 
     const form = reactive({
       nickname: '',
@@ -246,9 +234,16 @@ export default {
             const res = await login(loginData)
             if (res.code === '200') {
               ElMessage.success('登录成功！')
-              // 保存用户信息到本地存储
+              // 保存用户信息到本地存储和 Vuex
               localStorage.setItem('user', JSON.stringify(res.data))
-              // 跳转到首页
+              try {
+                store.commit('user/SET_TOKEN', res.data.jwtToken); // Store token in Vuex (namespaced)
+                store.commit('user/SET_USER', res.data); // Store user data in Vuex (namespaced)
+                // 跳转到首页
+              } catch (error) {
+                console.error('保存 token 失败:', error)
+                ElMessage.error('保存登录信息失败')
+              }
               router.push('/')
             } else {
               ElMessage.error(res.message || '登录失败，请检查账号密码')
