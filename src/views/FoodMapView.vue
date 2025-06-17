@@ -68,7 +68,7 @@
     <CategoryForm />
 
     <!-- 移动端遮罩 -->
-    <div v-if="isMobile && !sidebarCollapsed" class="mobile-overlay" @click="closeSidebar"></div>
+    <!-- <div v-if="isMobile && !sidebarCollapsed" class="mobile-overlay" @click="closeSidebar"></div> -->
   </div>
 </template>
 
@@ -464,9 +464,9 @@ export default {
   transform: none;
 }
 
-.mobile-overlay {
+/* .mobile-overlay {
   position: fixed;
-  top: 60px; /* 在移动端顶部工具栏下方 */
+  top: 60px; 
   left: 0;
   right: 0;
   bottom: 0;
@@ -474,7 +474,7 @@ export default {
   backdrop-filter: blur(4px);
   z-index: 1000;
   animation: fadeIn var(--transition-fast) ease-out;
-}
+} */
 
 /* 响应式设计 */
 @media (max-width: 768px) {
@@ -512,9 +512,9 @@ export default {
     width: 300px;
   }
 
-  .mobile-overlay {
+  /* .mobile-overlay {
     top: 56px;
-  }
+  } */
 }
 
 @media (max-width: 480px) {
@@ -544,9 +544,9 @@ export default {
     border-radius: 0;
   }
 
-  .mobile-overlay {
-    top: 52px;
-  }
+  /* .mobile-overlay {
+    display: none;
+  } */
 
   .sidebar-header {
     padding: var(--spacing-md);
