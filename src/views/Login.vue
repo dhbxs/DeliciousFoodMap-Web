@@ -28,66 +28,66 @@
           </span>
         </div>
 
-        <div class="form-container">
-          <div class="form-header">
-            <h1>创建账号</h1>
-            <p>
-              已有账号？
-              <span>
-                <el-link type="primary" href="#">立即登录</el-link>
-              </span>
-            </p>
+        <div>
+          <div class="form-container">
+            <div class="form-header">
+              <h1>{{ isRegister ? "创建账号" : "登录账号" }}</h1>
+              <p>
+                {{ isRegister ? "已有账号？" : "还没有账号？" }}
+                <span @click="toggleRegisterOrLogin">
+                  {{ isRegister ? "立即登录" : "立即注册" }}
+                </span>
+              </p>
+            </div>
+
+            <el-form :model="form" :rules="rules" ref="formRef" class="register-form">
+              <el-row v-if="isRegister" :gutter="16">
+                <el-col :span="12">
+                  <el-form-item prop="firstName">
+                    <el-input v-model="form.firstName" placeholder="姓氏" size="large" class="form-input" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item prop="lastName">
+                    <el-input v-model="form.lastName" placeholder="名字" size="large" class="form-input" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+
+              <el-form-item prop="email">
+                <el-input v-model="form.email" placeholder="电子邮箱" type="email" size="large" class="form-input" />
+              </el-form-item>
+
+              <el-form-item prop="password">
+                <el-input v-model="form.password" :placeholder="isRegister ? '设置密码' : '密码'" :type="showPassword ? 'text' : 'password'"
+                  size="large" class="form-input">
+                  <template #suffix>
+                    <el-icon @click="showPassword = !showPassword" class="password-icon">
+                      <View v-if="!showPassword" />
+                      <Hide v-else />
+                    </el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item prop="agreeToTerms">
+                <el-checkbox v-model="form.agreeToTerms" class="terms-checkbox">
+                  我同意&nbsp;
+                  <el-link type="primary" href="#">服务条款</el-link>
+                  &nbsp;和&nbsp;
+                  <el-link type="primary" href="#">隐私政策</el-link>
+                </el-checkbox>
+              </el-form-item>
+
+              <el-form-item>
+                <el-button type="primary" size="large" class="submit-button" @click="handleSubmit" :loading="loading">
+                  {{ isRegister ? "创建账号" : "登录" }}
+                </el-button>
+              </el-form-item>
+            </el-form>
           </div>
-
-          <el-form :model="form" :rules="rules" ref="formRef" class="register-form">
-            <el-row :gutter="16">
-              <el-col :span="12">
-                <el-form-item prop="firstName">
-                  <el-input v-model="form.firstName" placeholder="姓氏" size="large" class="form-input" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item prop="lastName">
-                  <el-input v-model="form.lastName" placeholder="名字" size="large" class="form-input" />
-                </el-form-item>
-              </el-col>
-            </el-row>
-
-            <el-form-item prop="email">
-              <el-input v-model="form.email" placeholder="电子邮箱" type="email" size="large" class="form-input" />
-            </el-form-item>
-
-            <el-form-item prop="password">
-              <el-input v-model="form.password" placeholder="设置密码" :type="showPassword ? 'text' : 'password'"
-                size="large" class="form-input">
-                <template #suffix>
-                  <el-icon @click="showPassword = !showPassword" class="password-icon">
-                    <View v-if="!showPassword" />
-                    <Hide v-else />
-                  </el-icon>
-                </template>
-              </el-input>
-            </el-form-item>
-
-            <el-form-item prop="agreeToTerms">
-              <el-checkbox v-model="form.agreeToTerms" class="terms-checkbox">
-                我同意&nbsp;
-                <el-link type="primary" href="#">服务条款</el-link>
-                &nbsp;和&nbsp;
-                <el-link type="primary" href="#">隐私政策</el-link>
-              </el-checkbox>
-            </el-form-item>
-
-            <el-form-item>
-              <el-button type="primary" size="large" class="submit-button" @click="handleSubmit" :loading="loading">
-                创建账号
-              </el-button>
-            </el-form-item>
-          </el-form>
-
         </div>
       </div>
-
     </div>
   </div>
 </template>
@@ -110,6 +110,7 @@ export default {
     const formRef = ref()
     const showPassword = ref(false)
     const loading = ref(false)
+    const isRegister = ref(true)
 
     const form = reactive({
       firstName: '',
@@ -148,6 +149,11 @@ export default {
       ]
     }
 
+    // 切换登录还是注册
+    const toggleRegisterOrLogin = () => {
+      isRegister.value = !isRegister.value
+    };
+
     const handleSubmit = async () => {
       try {
         await formRef.value.validate()
@@ -170,7 +176,9 @@ export default {
       rules,
       showPassword,
       loading,
-      handleSubmit
+      handleSubmit,
+      isRegister,
+      toggleRegisterOrLogin
     }
   }
 }
@@ -268,14 +276,14 @@ export default {
   color: #9ca3af;
 }
 
-.right-section .form-container .form-header p,
-.right-section .form-container .form-header p span {
+.right-section .form-container .form-header p {
   display: flex;
   align-items: center;
 }
 
-.right-section .form-container .form-header p .el-link {
+.right-section .form-container .form-header p span {
   color: #5064cb;
+  cursor: pointer;
 }
 
 :deep(.form-input .el-input__wrapper) {
@@ -357,7 +365,8 @@ export default {
     width: 90%;
     padding: 30px;
     border-radius: 8%;
-    background-color: #191818;;
+    background-color: #191818;
+    ;
   }
 }
 
