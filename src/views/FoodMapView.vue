@@ -9,6 +9,28 @@
         <h2 class="mobile-title">未境美食地图</h2>
       </div>
       <div class="mobile-header-right">
+        <!-- 移动端用户菜单 -->
+        <el-dropdown trigger="click" placement="bottom-end" class="user-dropdown">
+          <div class="user-avatar-mobile">
+            <el-avatar :size="36" :src="userAvatar" class="user-avatar">
+              {{ userInitials }}
+            </el-avatar>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item disabled>
+                <div class="user-info">
+                  <div class="user-name">{{ userName }}</div>
+                  <div class="user-email">{{ userEmail }}</div>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item divided @click="handleLogout">
+                <el-icon><SwitchButton /></el-icon>
+                退出登录
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
         <ThemeToggle />
         <!-- <el-button type="primary" :icon="Plus" @click="addShop" circle class="mobile-add-btn" /> -->
       </div>
@@ -27,6 +49,29 @@
         <div v-if="!isMobile" class="sidebar-header" :class="{ collapsed: sidebarCollapsed }">
           <h2 v-if="!sidebarCollapsed">未境美食地图</h2>
           <div v-if="!sidebarCollapsed" class="header-actions">
+            <!-- 桌面端用户菜单 -->
+            <el-dropdown trigger="click" placement="bottom-end" class="user-dropdown">
+              <div class="user-avatar-desktop">
+                <el-avatar :size="40" :src="userAvatar" class="user-avatar">
+                  {{ userInitials }}
+                </el-avatar>
+                <span class="user-name-desktop">{{ userName }}</span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item disabled>
+                    <div class="user-info">
+                      <div class="user-name">{{ userName }}</div>
+                      <div class="user-email">{{ userEmail }}</div>
+                    </div>
+                  </el-dropdown-item>
+                  <el-dropdown-item divided @click="handleLogout">
+                    <el-icon><SwitchButton /></el-icon>
+                    退出登录
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <ThemeToggle />
           </div>
         </div>
@@ -75,10 +120,12 @@
 <script>
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useStore } from "vuex";
-import { Menu, Plus, ArrowLeft, ArrowRight, ArrowDown, ArrowUp } from "@element-plus/icons-vue";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import { Menu, Plus, ArrowLeft, ArrowRight, ArrowDown, ArrowUp, SwitchButton } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
-
+import { logout } from '@/api/user';
 // 导入组件
 import MapView from "@/components/MapView.vue";
 import CategoryFilter from "@/components/CategoryFilter.vue";
@@ -102,12 +149,27 @@ export default {
 
   setup() {
     const store = useStore();
+    const router = useRouter();
 
     // 计算属性
     const sidebarCollapsed = computed(
       () => store.getters["ui/sidebarCollapsed"]
     );
     const isMobile = computed(() => store.getters["ui/isMobile"]);
+
+    // 用户信息
+    const userInfo = computed(() => {
+      return store.state.user;
+    });
+    
+    const userName = computed(() => userInfo.value.nickname || '未登录用户');
+    const userEmail = computed(() => userInfo.value.email || '');
+    const userAvatar = computed(() => userInfo.value.avatar || '');
+    const userInitials = computed(() => {
+      const name = userName.value;
+      if (name === '未登录用户') return '?';
+      return name.length > 0 ? name.charAt(0).toUpperCase() : '?';
+    });
     
     // 分类筛选折叠状态
     const categoryFilterCollapsed = ref(false);
@@ -130,6 +192,25 @@ export default {
     // 添加店铺
     const addShop = () => {
       store.dispatch("ui/showShopForm");
+    };
+
+    // 退出登录
+    const handleLogout = async () => {
+      try {
+        // 调用登出接口
+        const res = await logout();
+        // 清除本地存储的用户信息
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
+        
+        ElMessage.success('退出登录成功');
+        
+        // 跳转到登录页面
+        await router.push('/login');
+      } catch (error) {
+        console.error('退出登录失败:', error);
+        ElMessage.error('退出登录失败');
+      }
     };
 
     // 窗口大小变化处理
@@ -173,12 +254,18 @@ export default {
       addShop,
       toggleCategoryFilter,
       categoryFilterCollapsed,
+      userName,
+      userEmail,
+      userAvatar,
+      userInitials,
+      handleLogout,
       Menu,
       Plus,
       ArrowLeft,
       ArrowRight,
       ArrowDown,
       ArrowUp,
+      SwitchButton,
     };
   },
 };
@@ -372,6 +459,79 @@ export default {
   gap: var(--spacing-sm);
 }
 
+/* 用户下拉菜单样式 */
+.user-dropdown {
+  cursor: pointer;
+}
+
+.user-avatar-desktop {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.user-avatar-desktop:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.user-avatar-mobile {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.user-avatar-mobile:hover {
+  transform: scale(1.05);
+}
+
+.user-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.user-avatar:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-md);
+}
+
+.user-name-desktop {
+  color: var(--text-inverse);
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-info {
+  padding: var(--spacing-sm) 0;
+  text-align: center;
+}
+
+.user-info .user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.user-info .user-email {
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
 .sidebar-content {
   flex: 1;
   display: flex;
@@ -563,6 +723,25 @@ export default {
 
   .shop-list-container {
     padding: var(--spacing-md);
+  }
+
+  /* 移动端用户头像调整 */
+  .user-avatar-mobile .user-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .user-name-desktop {
+    font-size: 12px;
+    max-width: 80px;
+  }
+
+  .user-info .user-name {
+    font-size: 14px;
+  }
+
+  .user-info .user-email {
+    font-size: 11px;
   }
 }
 
