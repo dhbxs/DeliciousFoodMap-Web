@@ -61,7 +61,6 @@
                 <el-dropdown-menu>
                   <el-dropdown-item disabled>
                     <div class="user-info">
-                      <div class="user-name">{{ userName }}</div>
                       <div class="user-email">{{ userEmail }}</div>
                     </div>
                   </el-dropdown-item>
@@ -159,18 +158,21 @@ export default {
 
     // 用户信息
     const userInfo = computed(() => {
-      return store.state.user;
+      let store_user = store.state.user.user;
+      if (store_user) {
+        return store_user;
+      }
+      store_user = JSON.parse(localStorage.getItem('user'));
+      return store_user;
     });
-    
-    const userName = computed(() => userInfo.value.nickname || '未登录用户');
+    const userName = computed(() => userInfo.value.nickName || '未登录用户');
+    console.log(userName);
     const userEmail = computed(() => userInfo.value.email || '');
     const userAvatar = computed(() => userInfo.value.avatar || '');
     const userInitials = computed(() => {
-      const name = userName.value;
-      if (name === '未登录用户') return '?';
-      return name.length > 0 ? name.charAt(0).toUpperCase() : '?';
+      if (userName.value === '未登录用户') return '?';
+      return userName.value.length > 0 ? userName.value.charAt(0).toUpperCase() : '?';
     });
-    
     // 分类筛选折叠状态
     const categoryFilterCollapsed = ref(false);
     const toggleCategoryFilter = () => {

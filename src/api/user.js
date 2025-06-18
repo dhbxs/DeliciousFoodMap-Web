@@ -22,7 +22,8 @@ export function register(data) {
 // 退出
 export function logout() {
   return request({
-    url: '/sys-user/logout'
+    url: '/sys-user/logout',
+    method: 'post'
   })
 }
 

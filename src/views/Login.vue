@@ -239,6 +239,9 @@ export default {
               try {
                 store.commit('user/SET_TOKEN', res.data.jwtToken); // Store token in Vuex (namespaced)
                 store.commit('user/SET_USER', res.data); // Store user data in Vuex (namespaced)
+                // 存储到本地存储
+                localStorage.setItem('token', res.data.jwtToken);
+                localStorage.setItem('user', JSON.stringify(res.data));
                 // 跳转到首页
               } catch (error) {
                 console.error('保存 token 失败:', error)

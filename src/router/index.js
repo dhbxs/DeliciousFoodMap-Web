@@ -40,9 +40,7 @@ router.beforeEach((to, from, next) => {
   // Check if route requires authentication
   if (to.meta.requiresAuth) {
     // Check if user is authenticated (Vuex token or localStorage token)
-    const token = store.state.user.token ||
-                 (localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).token : null);
-    
+    const token = store.state.user.token || (localStorage.getItem("token"));
     if (token) {
       // User is authenticated, proceed
       next();
