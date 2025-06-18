@@ -176,6 +176,8 @@ export default {
           offset: new window.AMap.Pixel(-15, -15), // 标记偏移量
         });
 
+        shop.description = shop.description || "暂无描述";
+
         // 创建信息窗体 (优化样式 - 简化结构)
         const infoWindow = new window.AMap.InfoWindow({
           content: `
