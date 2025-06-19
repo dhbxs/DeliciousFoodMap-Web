@@ -10,6 +10,17 @@ const serverConfig = {
     useTokenAuthorization: true, // 开启Token认证
 }
 
+// 白名单，不添加token的请求地址
+const whiteList = [
+    '/captcha/getCaptcha.png',
+    '/sys-user/login',
+    '/sys-user/register',
+]
+
+const isInWhiteList = (url) => {
+    return whiteList.includes(url);
+}
+
 // 创建axios实例
 const request = axios.create({
     // 通用请求地址前缀
@@ -21,15 +32,21 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(function (config) {
+    console.log("request url: ", config.url);
+
+    if (isInWhiteList(config.url)) {
+        return config
+    }
+
     if (serverConfig.useTokenAuthorization) {
         // 优先从 Vuex 获取 token
-        const token = store.state.user.token;
+        const token = store.state.user.user.jwtToken;
         if (token) {
             config.headers.authorization = "Bearer " + token;
         } else {
             // 回退到 localStorage 获取 token
-            let token = localStorage.getItem("token");            
-            config.headers.authorization = "Bearer " + token;
+            let user = localStorage.getItem("user");            
+            config.headers.authorization = "Bearer " + user.jwtToken;
         }
     }
     return config;
@@ -46,7 +63,6 @@ request.interceptors.response.use(function (response) {
     if (response.config.responseType === 'blob') {
         return response.data;
     }
-    
     // 处理普通JSON响应
     if (response.data.code != "200") {
         if (response.data.code == "5000" || response.data.code == "5001" || response.data.code == "5002") {
