@@ -234,13 +234,9 @@ export default {
             const res = await login(loginData)
             if (res.code === '200') {
               ElMessage.success('登录成功！')
-              // 保存用户信息到本地存储和 Vuex
-              localStorage.setItem('user', JSON.stringify(res.data))
               try {
-                store.commit('user/SET_TOKEN', res.data.jwtToken); // Store token in Vuex (namespaced)
                 store.commit('user/SET_USER', res.data); // Store user data in Vuex (namespaced)
                 // 存储到本地存储
-                localStorage.setItem('token', res.data.jwtToken);
                 localStorage.setItem('user', JSON.stringify(res.data));
                 // 跳转到首页
               } catch (error) {

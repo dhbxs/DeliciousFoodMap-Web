@@ -51,9 +51,7 @@ request.interceptors.response.use(function (response) {
     if (response.data.code != "200") {
         if (response.data.code == "5000" || response.data.code == "5001" || response.data.code == "5002") {
             localStorage.removeItem("user");
-            localStorage.removeItem("token");
             // 清除 Vuex 中的用户数据 (使用命名空间)
-            store.commit('user/SET_TOKEN', null);
             store.commit('user/SET_USER', null);
             ElMessage({
                 showClose: true,

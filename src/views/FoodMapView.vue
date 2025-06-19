@@ -202,8 +202,7 @@ export default {
         // 调用登出接口
         const res = await logout();
         // 清除本地存储的用户信息
-        localStorage.removeItem('userInfo');
-        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         
         ElMessage.success('退出登录成功');
         
