@@ -162,16 +162,28 @@ export default {
       if (store_user) {
         return store_user;
       }
-      store_user = JSON.parse(localStorage.getItem('user'));
-      return store_user;
+      
+      const localUser = localStorage.getItem('user');
+      if (localUser) {
+        try {
+          store_user = JSON.parse(localUser);
+          return store_user;
+        } catch (error) {
+          console.error('解析用户信息失败:', error);
+          return null;
+        }
+      }
+      
+      return null;
     });
-    const userName = computed(() => userInfo.value.nickName || '未登录用户');
-    console.log(userName);
-    const userEmail = computed(() => userInfo.value.email || '');
-    const userAvatar = computed(() => userInfo.value.avatar || '');
+    
+    const userName = computed(() => userInfo.value?.nickName || '未登录用户');
+    const userEmail = computed(() => userInfo.value?.email || '');
+    const userAvatar = computed(() => userInfo.value?.avatar || '');
     const userInitials = computed(() => {
-      if (userName.value === '未登录用户') return '?';
-      return userName.value.length > 0 ? userName.value.charAt(0).toUpperCase() : '?';
+      const name = userName.value;
+      if (!name || name === '未登录用户') return '?';
+      return name.length > 0 ? name.charAt(0).toUpperCase() : '?';
     });
     // 分类筛选折叠状态
     const categoryFilterCollapsed = ref(false);
@@ -201,8 +213,12 @@ export default {
       try {
         // 调用登出接口
         const res = await logout();
+        
         // 清除本地存储的用户信息
         localStorage.removeItem('user');
+        
+        // 清除Vuex store中的用户信息
+        store.commit('user/CLEAR_USER');
         
         ElMessage.success('退出登录成功');
         
@@ -210,7 +226,15 @@ export default {
         await router.push('/login');
       } catch (error) {
         console.error('退出登录失败:', error);
-        ElMessage.error('退出登录失败');
+        
+        // 即使接口调用失败，也要清除本地用户信息
+        localStorage.removeItem('user');
+        store.commit('user/CLEAR_USER');
+        
+        ElMessage.error('退出登录失败，但已清除本地登录状态');
+        
+        // 跳转到登录页面
+        await router.push('/login');
       }
     };
 
