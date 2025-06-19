@@ -2,7 +2,6 @@
   <el-dialog
     v-model="visible"
     :title="isEditing ? '编辑店铺' : '添加店铺'"
-    width="500px"
     @close="handleClose"
   >
     <el-form
@@ -104,6 +103,8 @@ export default {
     const store = useStore();
     const formRef = ref(null);
     const loading = ref(false);
+
+    const isMobile = window.innerWidth < 768;
 
     // 表单数据
     const form = ref({
@@ -296,6 +297,7 @@ export default {
       loading,
       handleSubmit,
       handleClose,
+      isMobile
     };
   },
 };
@@ -392,10 +394,12 @@ export default {
 
 /* 移动端响应式 */
 @media (max-width: 768px) {
-  :deep(.el-dialog) {
+  /* :deep(.el-dialog) {
     margin: var(--spacing-md);
     max-width: calc(100vw - 2 * var(--spacing-md));
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-xl); */
+  ::deep(.el-dialog) {
+    width: 90% !important;
   }
 
   :deep(.el-dialog__header) {
@@ -458,11 +462,16 @@ export default {
 }
 
 @media (max-width: 480px) {
-  :deep(.el-dialog) {
+  /* :deep(.el-dialog) {
     margin: var(--spacing-sm);
     max-width: calc(100vw - 2 * var(--spacing-sm));
     max-height: calc(100vh - 2 * var(--spacing-sm));
+  } */
+
+  ::deep(.el-dialog) {
+    width: 30% !important;
   }
+
 
   :deep(.el-dialog__header) {
     padding: var(--spacing-md);
