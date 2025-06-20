@@ -3,7 +3,7 @@
     class="shop-form-dialog"
     v-model="visible"
     :title="isEditing ? '编辑店铺' : '添加店铺'"
-    :width="isMobile ? '85%' : '600px'"
+    :width="'600px'"
     @close="handleClose"
   >
     <el-form
@@ -106,15 +106,6 @@ export default {
     const formRef = ref(null);
     const loading = ref(false);
 
-    // 响应式移动端检测
-    const windowWidth = ref(window.innerWidth);
-    const isMobile = computed(() => windowWidth.value < 768);
-
-    // 监听窗口大小变化
-    const handleResize = () => {
-      windowWidth.value = window.innerWidth;
-    };
-
     // 表单数据
     const form = ref({
       name: "",
@@ -143,12 +134,6 @@ export default {
     // Load categories on mount
     onMounted(async () => {
       await categoryService.getCategories();
-      window.addEventListener('resize', handleResize);
-    });
-
-    // 清理监听器
-    onUnmounted(() => {
-      window.removeEventListener('resize', handleResize);
     });
 
     // 表单验证规则
@@ -311,8 +296,7 @@ export default {
       categories,
       loading,
       handleSubmit,
-      handleClose,
-      isMobile
+      handleClose
     };
   },
 };
@@ -409,7 +393,6 @@ export default {
 
 /* 移动端响应式 */
 @media (max-width: 768px) {
-
   :deep(.el-dialog__header) {
     padding: var(--spacing-lg);
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
@@ -417,6 +400,7 @@ export default {
 
   :deep(.el-dialog__title) {
     font-size: 16px;
+    color: var(--text-primary) !important;
   }
 
   :deep(.el-dialog__body) {
@@ -454,7 +438,7 @@ export default {
 
   .dialog-footer {
     gap: var(--spacing-sm);
-    flex-direction: column-reverse;
+    flex-direction: row;
   }
 
   .dialog-footer .el-button {
@@ -470,8 +454,17 @@ export default {
 }
 
 @media (max-width: 480px) {
+  .shop-form-dialog {
+    width: 95% !important;
+    background-color: var(--bg-primary);
+    margin: var(--spacing-sm);
+    max-width: calc(100vw - 2 * var(--spacing-sm));
+    max-height: calc(100vh - 2 * var(--spacing-sm));
+  }
+
   :deep(.el-dialog) {
     width: 95% !important;
+    background-color: var(--bg-primary) !important;
     margin: var(--spacing-sm);
     max-width: calc(100vw - 2 * var(--spacing-sm));
     max-height: calc(100vh - 2 * var(--spacing-sm));
@@ -518,6 +511,21 @@ export default {
     height: 44px;
     font-size: 14px;
     padding: 12px 16px;
+  }
+}
+</style>
+
+
+<style>
+@media (max-width: 768px) {
+  .el-dialog {
+    width: 90% !important;
+    font-size: 14px;
+    background-color: var(--bg-secondary) !important;
+  }
+  .el-dialog__title {
+    /* font-size: 16px; */
+    color: var(--text-primary) !important;
   }
 }
 </style>
