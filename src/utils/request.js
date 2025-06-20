@@ -39,8 +39,8 @@ request.interceptors.request.use(function (config) {
     }
 
     if (serverConfig.useTokenAuthorization) {
-        // 优先从 Vuex 获取 token
-        const token = store.state.user.user.jwtToken;
+        const user = store.state.user.user;
+        let token = user ? user.jwtToken : null;
         if (token) {
             config.headers.authorization = "Bearer " + token;
         } else {
