@@ -10,7 +10,8 @@ export function getPoiData(data = {}) {
     return request({
         method: 'POST',
         url: '/poi-data/search',
-        data: data
+        data: data,
+        requireAuth: false
     })
 }
 
@@ -24,6 +25,7 @@ export function insertOrUpdateOrDeleteData(data = {}) {
     return request({
         method: 'POST',
         url: '/poi-data/insert-or-update-or-delete',
-        data: data
+        data: data,
+        requireAuth: true
     })
 }

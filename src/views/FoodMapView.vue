@@ -124,7 +124,7 @@ import { ElMessage } from "element-plus";
 import { Menu, Plus, ArrowLeft, ArrowRight, ArrowDown, ArrowUp, SwitchButton } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
-import { logout } from '@/api/user';
+import { logout } from '@/api/userApi';
 // 导入组件
 import MapView from "@/components/MapView.vue";
 import CategoryFilter from "@/components/CategoryFilter.vue";

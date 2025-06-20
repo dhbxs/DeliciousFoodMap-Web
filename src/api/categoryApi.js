@@ -10,7 +10,8 @@ export function getCategoryData(params = {}) {
     return request({
         method: 'POST',
         url: '/category/get-all',
-        params: params
+        params: params,
+        requireAuth: false
     })
 }
 
@@ -27,6 +28,7 @@ export function insertOrUpdateOrDeleteCategory(data = {}) {
     return request({
         method: 'POST',
         url: '/category/insert-or-update-or-delete',
-        data: data
+        data: data,
+        requireAuth: true
     })
 }

@@ -96,7 +96,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ArrowRight, View, Hide, Platform, Apple } from '@element-plus/icons-vue'
-import { login, register, getCode } from '@/api/user';
+import { login, register, getCode } from '@/api/userApi';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex'; // Add Vuex store
 

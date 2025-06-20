@@ -10,17 +10,6 @@ const serverConfig = {
     useTokenAuthorization: true, // 开启Token认证
 }
 
-// 白名单，不添加token的请求地址
-const whiteList = [
-    '/captcha/getCaptcha.png',
-    '/sys-user/login',
-    '/sys-user/register',
-]
-
-const isInWhiteList = (url) => {
-    return whiteList.includes(url);
-}
-
 // 创建axios实例
 const request = axios.create({
     // 通用请求地址前缀
@@ -38,7 +27,7 @@ request.interceptors.request.use(function (config) {
         return config
     }
 
-    if (serverConfig.useTokenAuthorization) {
+    if (serverConfig.useTokenAuthorization && config.requireAuth == true) {
         const user = store.state.user.user;
         let token = user ? user.jwtToken : null;
         if (token) {
