@@ -1,7 +1,9 @@
 <template>
   <el-dialog
+    class="shop-form-dialog"
     v-model="visible"
     :title="isEditing ? '编辑店铺' : '添加店铺'"
+    :width="isMobile ? '85%' : '600px'"
     @close="handleClose"
   >
     <el-form
@@ -90,7 +92,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, nextTick, onMounted } from "vue";
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage } from "element-plus";
 import categoryService from '@/services/CategoryService';
@@ -104,7 +106,14 @@ export default {
     const formRef = ref(null);
     const loading = ref(false);
 
-    const isMobile = window.innerWidth < 768;
+    // 响应式移动端检测
+    const windowWidth = ref(window.innerWidth);
+    const isMobile = computed(() => windowWidth.value < 768);
+
+    // 监听窗口大小变化
+    const handleResize = () => {
+      windowWidth.value = window.innerWidth;
+    };
 
     // 表单数据
     const form = ref({
@@ -134,6 +143,12 @@ export default {
     // Load categories on mount
     onMounted(async () => {
       await categoryService.getCategories();
+      window.addEventListener('resize', handleResize);
+    });
+
+    // 清理监听器
+    onUnmounted(() => {
+      window.removeEventListener('resize', handleResize);
     });
 
     // 表单验证规则
@@ -394,13 +409,6 @@ export default {
 
 /* 移动端响应式 */
 @media (max-width: 768px) {
-  /* :deep(.el-dialog) {
-    margin: var(--spacing-md);
-    max-width: calc(100vw - 2 * var(--spacing-md));
-    border-radius: var(--radius-xl); */
-  ::deep(.el-dialog) {
-    width: 90% !important;
-  }
 
   :deep(.el-dialog__header) {
     padding: var(--spacing-lg);
@@ -462,14 +470,11 @@ export default {
 }
 
 @media (max-width: 480px) {
-  /* :deep(.el-dialog) {
+  :deep(.el-dialog) {
+    width: 95% !important;
     margin: var(--spacing-sm);
     max-width: calc(100vw - 2 * var(--spacing-sm));
     max-height: calc(100vh - 2 * var(--spacing-sm));
-  } */
-
-  ::deep(.el-dialog) {
-    width: 30% !important;
   }
 
 
