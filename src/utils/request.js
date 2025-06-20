@@ -22,11 +22,6 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(function (config) {
     console.log("request url: ", config.url);
-
-    if (isInWhiteList(config.url)) {
-        return config
-    }
-
     if (serverConfig.useTokenAuthorization && config.requireAuth == true) {
         const user = store.state.user.user;
         let token = user ? user.jwtToken : null;
