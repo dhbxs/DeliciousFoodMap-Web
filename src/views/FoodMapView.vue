@@ -803,4 +803,9 @@ export default {
   height: 40px;
   border-width: 3px;
 }
+
+.el-dropdown-menu {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
 </style>
