@@ -163,17 +163,6 @@ export default {
         return store_user;
       }
       
-      const localUser = localStorage.getItem('user');
-      if (localUser) {
-        try {
-          store_user = JSON.parse(localUser);
-          return store_user;
-        } catch (error) {
-          console.error('解析用户信息失败:', error);
-          return null;
-        }
-      }
-      
       return null;
     });
     
@@ -214,11 +203,8 @@ export default {
         // 调用登出接口
         const res = await logout();
         
-        // 清除本地存储的用户信息
-        localStorage.removeItem('user');
-        
-        // 清除Vuex store中的用户信息
-        store.commit('user/CLEAR_USER');
+        // 清除vuex 保存到 localStorage 中的所有信息
+        localStorage.removeItem('delicious-food-map');
         
         ElMessage.success('退出登录成功');
         
@@ -227,9 +213,7 @@ export default {
       } catch (error) {
         console.error('退出登录失败:', error);
         
-        // 即使接口调用失败，也要清除本地用户信息
-        localStorage.removeItem('user');
-        store.commit('user/CLEAR_USER');
+        localStorage.removeItem('delicious-food-map');
         
         ElMessage.error('退出登录失败，但已清除本地登录状态');
         

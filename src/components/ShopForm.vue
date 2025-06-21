@@ -271,6 +271,14 @@ export default {
 </script>
 
 <style scoped>
+ :deep(.el-dialog) {
+  border-radius: 12px;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+}
+
 :deep(.el-input__wrapper),
 :deep(.el-select__wrapper),
 :deep(.el-textarea__inner) {

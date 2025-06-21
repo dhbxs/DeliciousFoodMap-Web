@@ -27,10 +27,6 @@ request.interceptors.request.use(function (config) {
         let token = user ? user.jwtToken : null;
         if (token) {
             config.headers.authorization = "Bearer " + token;
-        } else {
-            // 回退到 localStorage 获取 token
-            let user = localStorage.getItem("user");            
-            config.headers.authorization = "Bearer " + user.jwtToken;
         }
     }
     return config;
@@ -50,7 +46,6 @@ request.interceptors.response.use(function (response) {
     // 处理普通JSON响应
     if (response.data.code != "200") {
         if (response.data.code == "5000" || response.data.code == "5001" || response.data.code == "5002") {
-            localStorage.removeItem("user");
             // 清除 Vuex 中的用户数据 (使用命名空间)
             store.commit('user/SET_USER', null);
             ElMessage({

@@ -235,9 +235,7 @@ export default {
             if (res.code === '200') {
               ElMessage.success('登录成功！')
               try {
-                store.commit('user/SET_USER', res.data); // Store user data in Vuex (namespaced)
-                // 存储到本地存储
-                localStorage.setItem('user', JSON.stringify(res.data));
+                store.commit('user/SET_USER', res.data);
                 // 跳转到首页
               } catch (error) {
                 console.error('保存 token 失败:', error)
