@@ -1,94 +1,62 @@
 <template>
-  <el-dialog
-    class="shop-form-dialog"
-    v-model="visible"
-    :title="isEditing ? '编辑店铺' : '添加店铺'"
-    :width="'600px'"
-    @close="handleClose"
-  >
-    <el-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
-      label-width="80px"
-      @submit.prevent="handleSubmit"
-    >
-      <el-form-item label="店铺名称" prop="name">
-        <el-input v-model="form.name" placeholder="请输入店铺名称" clearable />
-      </el-form-item>
+  <div class="shop-form">
+    <el-dialog class="shop-form-dialog" v-model="visible" :title="isEditing ? '编辑店铺' : '添加店铺'" :width="'600px'"
+      @close="handleClose">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px" @submit.prevent="handleSubmit">
+        <el-form-item label="店铺名称" prop="name">
+          <el-input v-model="form.name" placeholder="请输入店铺名称" clearable />
+        </el-form-item>
 
-      <el-form-item label="地址" prop="address">
-        <el-input
-          v-model="form.address"
-          placeholder="请输入店铺地址"
-          clearable
-        />
-      </el-form-item>
+        <el-form-item label="地址" prop="address">
+          <el-input v-model="form.address" placeholder="请输入店铺地址" clearable />
+        </el-form-item>
 
-      <el-form-item label="分类" prop="categoryId">
-        <el-select
-          v-model="form.categoryId"
-          placeholder="请选择分类"
-          style="width: 100%"
-          filterable
-          allow-create
-        >
-          <el-option
-            v-for="category in categories"
-            :key="category.id"
-            :label="category.name"
-            :value="category.id"
-          >
-            <span>{{ category.icon }} {{ category.name }}</span>
-          </el-option>
-        </el-select>
-      </el-form-item>
+        <el-form-item label="分类" prop="categoryId">
+          <el-select append-to=".shop-form" v-model="form.categoryId" placeholder="请选择分类" filterable allow-create>
+            <el-option v-for="category in categories" :key="category.id" :label="category.name" :value="category.id">
+              <div class="category-dropdown">
+                <div class="category-icon" :style="{ backgroundColor: category.color }">
+                  <svg class="icon" aria-hidden="true" style="font-size: 28px;">
+                    <use :xlink:href="category.icon"></use>
+                  </svg>
+                </div>
+                <span>{{ category.name }}</span>
+              </div>
+            </el-option>
+          </el-select>
+        </el-form-item>
 
-      <el-form-item label="描述" prop="description">
-        <el-input
-          v-model="form.description"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入店铺描述或备注"
-        />
-      </el-form-item>
+        <el-form-item label="描述" prop="description">
+          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入店铺描述或备注" />
+        </el-form-item>
 
-      <el-form-item label="坐标">
-        <el-row :gutter="10">
-          <el-col :span="12">
-            <el-input
-              v-model.number="form.lat"
-              placeholder="纬度"
-              type="number"
-              step="0.000001"
-            />
-          </el-col>
-          <el-col :span="12">
-            <el-input
-              v-model.number="form.lng"
-              placeholder="经度"
-              type="number"
-              step="0.000001"
-            />
-          </el-col>
-        </el-row>
-        <div class="coordinate-hint">
-          <el-text size="small" type="info">
-            可以在地图上点击选择位置，或手动输入坐标
-          </el-text>
-        </div>
-      </el-form-item>
-    </el-form>
+        <el-form-item label="坐标" class="position">
+          <el-row>
+            <el-col>
+              <el-input v-model.number="form.lat" placeholder="纬度" type="number" step="0.000001" />
+            </el-col>
+            <el-col>
+              <el-input v-model.number="form.lng" placeholder="经度" type="number" step="0.000001" />
+            </el-col>
+          </el-row>
+          <div class="coordinate-hint">
+            <el-text size="small" type="info">
+              可以在地图上点击选择位置，或手动输入坐标
+            </el-text>
+          </div>
+        </el-form-item>
+      </el-form>
 
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
-        <el-button type="primary" @click="handleSubmit" :loading="loading">
-          {{ isEditing ? "更新" : "添加" }}
-        </el-button>
-      </span>
-    </template>
-  </el-dialog>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="handleClose">取消</el-button>
+          <el-button type="primary" @click="handleSubmit" :loading="loading">
+            {{ isEditing ? "更新" : "添加" }}
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -303,229 +271,53 @@ export default {
 </script>
 
 <style scoped>
-.coordinate-hint {
-  margin-top: var(--spacing-sm);
-  font-size: 13px;
-  color: var(--text-tertiary);
-  line-height: 1.4;
+:deep(.el-input__wrapper),
+:deep(.el-select__wrapper),
+:deep(.el-textarea__inner) {
+  border-radius: 8px;
 }
 
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-md);
-  padding-top: var(--spacing-lg);
-}
-
-/* 移动端适配 */
-:deep(.el-dialog) {
-  margin: var(--spacing-lg);
-  max-width: calc(100vw - 2 * var(--spacing-lg));
-}
-
-:deep(.el-dialog__header) {
-  padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-lg);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
-}
-
-:deep(.el-dialog__title) {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-:deep(.el-dialog__body) {
-  padding: var(--spacing-xl);
-  max-height: 60vh;
-  overflow-y: auto;
-}
-
-:deep(.el-form-item) {
-  margin-bottom: var(--spacing-lg);
-}
-
-:deep(.el-form-item__label) {
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-sm);
-}
-
-:deep(.el-input__wrapper) {
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-:deep(.el-input__wrapper):hover {
-  box-shadow: var(--shadow-md);
-}
-
-:deep(.el-input__wrapper.is-focus) {
+:deep(.el-input__wrapper.is-focus),
+:deep(.el-select__wrapper.is-focused),
+:deep(.el-textarea__inner.is-focus) {
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
-:deep(.el-textarea__inner) {
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-:deep(.el-select) {
+.position :deep(.el-row) {
   width: 100%;
+  gap: 2%;
+  flex-wrap: nowrap;
 }
 
-:deep(.el-select .el-input__wrapper) {
-  border-radius: var(--radius-lg);
+.position :deep(.el-col) {
+  flex: 1 1 auto;
 }
 
-.dialog-footer .el-button {
-  border-radius: var(--radius-lg);
-  font-weight: 600;
-  padding: var(--spacing-md) var(--spacing-xl);
-  transition: all var(--transition-fast);
+:deep(.el-dialog__footer) {
+  padding-top: 0;
 }
 
-.dialog-footer .el-button:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+.category-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  gap: 10px;
 }
 
-/* 移动端响应式 */
-@media (max-width: 768px) {
-  :deep(.el-dialog__header) {
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-  }
-
-  :deep(.el-dialog__title) {
-    font-size: 16px;
-    color: var(--text-primary) !important;
-  }
-
-  :deep(.el-dialog__body) {
-    padding: var(--spacing-lg);
-    max-height: 50vh;
-  }
-
-  :deep(.el-form-item) {
-    margin-bottom: var(--spacing-md);
-  }
-
-  :deep(.el-form-item__label) {
-    font-size: 14px;
-    width: auto !important;
-    float: none;
-    display: block;
-    margin-bottom: 8px;
-    text-align: left;
-  }
-
-  :deep(.el-input__wrapper),
-  :deep(.el-select) {
-    width: 100%;
-  }
-
-  :deep(.el-col) {
-    flex: 0 0 100%;
-    max-width: 100%;
-    margin-bottom: var(--spacing-sm);
-  }
-
-  :deep(.el-col:last-child) {
-    margin-bottom: 0;
-  }
-
-  .dialog-footer {
-    gap: var(--spacing-sm);
-    flex-direction: row;
-  }
-
-  .dialog-footer .el-button {
-    width: 100%;
-    height: 44px;
-    font-size: 15px;
-    padding: 12px 16px;
-  }
-
-  .coordinate-hint {
-    font-size: 12px;
-  }
+.category-icon {
+  width: 28px;
+  height: 28px;
+  margin: 3px 0 3px 0;
 }
 
-@media (max-width: 480px) {
-  .shop-form-dialog {
-    width: 95% !important;
-    background-color: var(--bg-primary);
-    margin: var(--spacing-sm);
-    max-width: calc(100vw - 2 * var(--spacing-sm));
-    max-height: calc(100vh - 2 * var(--spacing-sm));
-  }
+.dialog-footer :deep(.el-button) {
+  border-radius: 8px;
+}
 
+/* 小屏设备 */
+@media (max-width:767px) {
   :deep(.el-dialog) {
-    width: 95% !important;
-    background-color: var(--bg-primary) !important;
-    margin: var(--spacing-sm);
-    max-width: calc(100vw - 2 * var(--spacing-sm));
-    max-height: calc(100vh - 2 * var(--spacing-sm));
-  }
-
-
-  :deep(.el-dialog__header) {
-    padding: var(--spacing-md);
-  }
-
-  :deep(.el-dialog__title) {
-    font-size: 15px;
-  }
-
-  :deep(.el-dialog__body) {
-    padding: var(--spacing-md);
-    max-height: calc(100vh - 200px);
-  }
-
-  :deep(.el-form-item__label) {
-    font-size: 13px;
-    width: auto !important;
-    float: none;
-    display: block;
-    margin-bottom: 8px;
-  }
-
-  :deep(.el-input__wrapper),
-  :deep(.el-select) {
-    width: 100%;
-  }
-
-  :deep(.el-col) {
-    flex: 0 0 100%;
-    max-width: 100%;
-    margin-bottom: var(--spacing-xs);
-  }
-
-  :deep(.el-col:last-child) {
-    margin-bottom: 0;
-  }
-
-  .dialog-footer .el-button {
-    height: 44px;
-    font-size: 14px;
-    padding: 12px 16px;
-  }
-}
-</style>
-
-
-<style>
-@media (max-width: 768px) {
-  .el-dialog {
-    width: 90% !important;
-    font-size: 14px;
-    background-color: var(--bg-secondary) !important;
-  }
-  .el-dialog__title {
-    /* font-size: 16px; */
-    color: var(--text-primary) !important;
+    width: 90%;
   }
 }
 </style>
