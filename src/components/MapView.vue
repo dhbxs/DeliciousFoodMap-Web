@@ -196,6 +196,12 @@ export default {
                 <span class="detail-value">${shop.description}</span>
               </div>
               <div class="shop-actions">
+                 <button
+                  onclick="navigationToShop(${lng}, ${lat})"
+                  class="el-button el-button--primary"
+                >
+                  导航
+                </button>
                 <button
                   onclick="editShop(${shop.id})"
                   class="el-button el-button--primary"
@@ -293,6 +299,37 @@ export default {
     );
 
     // 全局函数，供弹窗按钮调用
+    window.navigationToShop = (lng, lat) => {
+      window.AMap.plugin("AMap.Geolocation", () => {
+        const geolocation = new window.AMap.Geolocation({
+          enableHighAccuracy: true, // 是否使用高精度定位
+          timeout: 10000, // 超时时间
+          maximumAge: 0, // 定位结果缓存0毫秒
+          convert: true,
+          panToLocation: false, // 定位成功后将定位到的位置作为地图中心点
+        });
+
+        geolocation.getCurrentPosition((status, result) => {
+          if (status === "complete") {
+            const pos = result.position;
+            if (pos && typeof pos.lng === "number" && typeof pos.lat === "number") {
+              // 更新store中的地图状态,从mutitions中的方法中更新
+              store.commit("ui/SET_MAP_CENTER", [pos.lat, pos.lng]);
+              
+              let url = `//uri.amap.com/navigation?from=${pos.lng},${pos.lat}&to=${lng},${lat}&mode=car&policy=0&callnative=1`;
+              // window.open("//uri.amap.com/navigation?from=116.478346,39.997361,startpoint&to=116.3246,39.966577,endpoint&via=116.402796,39.936915,midwaypoint&mode=car&policy=1&src=mypage&callnative=0", "_blank")
+              console.log("url:", url);
+              window.open(url, "_blank");
+            } else {
+              ElMessage.warning("无法获取有效位置信息");
+            }
+          } else {
+            ElMessage.error("定位失败: " + (result.message || "未知错误"));
+          }
+        });
+      });
+    };
+    
     window.editShop = (shopId) => {
       store.dispatch("ui/showShopForm", shopId);
     };
@@ -413,7 +450,7 @@ export default {
   border-radius: 12px;
   box-shadow: var(--el-box-shadow-light);
   padding: 20px;
-  max-width: 320px;
+  width: 320px;
   font-family: var(--el-font-family);
   color: var(--el-text-color-primary);
   border: 1px solid var(--el-border-color);
