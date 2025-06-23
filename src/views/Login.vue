@@ -44,23 +44,27 @@
               <el-form-item v-if="isRegister" prop="nickname">
                 <el-input v-model="form.nickname" placeholder="昵称" size="large" class="form-input" />
               </el-form-item>
-              <el-form-item prop="email">
-                <div v-if="isRegister" class="email-container">
-                  <el-input v-model="form.emailPrefix" placeholder="邮箱前缀" size="large" class="form-input email-prefix" />
-                  <span class="email-at">@</span>
-                  <el-select v-model="form.emailSuffix" placeholder="选择邮箱" size="large" class="form-input email-suffix">
-                    <el-option label="gmail.com" value="gmail.com" />
-                    <el-option label="qq.com" value="qq.com" />
-                    <el-option label="163.com" value="163.com" />
-                    <el-option label="126.com" value="126.com" />
-                    <el-option label="sina.com" value="sina.com" />
-                    <el-option label="hotmail.com" value="hotmail.com" />
-                    <el-option label="outlook.com" value="outlook.com" />
-                    <el-option label="yahoo.com" value="yahoo.com" />
-                  </el-select>
-                </div>
-                <el-input v-else v-model="form.email" placeholder="电子邮箱" type="email" size="large" class="form-input" />
+              <el-form-item prop="email" v-if="!isRegister">
+                <el-input v-model="form.email" placeholder="电子邮箱" type="email" size="large" class="form-input" />
               </el-form-item>
+
+              <div v-if="isRegister" class="email-combined-container">
+                <el-form-item prop="emailPrefix" class="email-combined-item">
+                  <el-input v-model="form.emailPrefix" placeholder="邮箱前缀" size="large" class="form-input" />
+                </el-form-item>
+                <el-form-item prop="emailSuffix" class="email-combined-item">
+                  <el-select v-model="form.emailSuffix" placeholder="选择邮箱" size="large" class="form-input">
+                    <el-option label="@gmail.com" value="@gmail.com" />
+                    <el-option label="@qq.com" value="@qq.com" />
+                    <el-option label="@163.com" value="@163.com" />
+                    <el-option label="@126.com" value="@126.com" />
+                    <el-option label="@sina.com" value="@sina.com" />
+                    <el-option label="@hotmail.com" value="@hotmail.com" />
+                    <el-option label="@outlook.com" value="@outlook.com" />
+                    <el-option label="@yahoo.com" value="@yahoo.com" />
+                  </el-select>
+                </el-form-item>
+              </div>
 
               <el-form-item prop="password">
                 <el-input v-model="form.password" :placeholder="isRegister ? '设置密码' : '密码'" :type="showPassword ? 'text' : 'password'"
@@ -107,7 +111,7 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { ArrowRight, View, Hide, Platform, Apple } from '@element-plus/icons-vue'
 import { login, register, getCode } from '@/api/userApi';
@@ -175,17 +179,6 @@ export default {
     })
 
     const rules = {
-      email: [
-        { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-        { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-      ],
-      emailPrefix: [
-        { required: true, message: '请输入邮箱前缀', trigger: 'blur' },
-        { pattern: /^[a-zA-Z0-9._-]+$/, message: '邮箱前缀只能包含字母、数字、点、下划线和连字符', trigger: 'blur' }
-      ],
-      emailSuffix: [
-        { required: true, message: '请选择邮箱后缀', trigger: 'change' }
-      ],
       password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
         { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
@@ -209,7 +202,26 @@ export default {
           trigger: 'change'
         }
       ]
-    }
+    };
+
+    watch(isRegister, (newValue) => {
+      if (newValue) {
+        rules.email = []
+        rules.emailPrefix = [
+          { required: true, message: '请输入邮箱前缀', trigger: 'blur' },
+          { pattern: /^[a-zA-Z0-9._-]+$/, message: '邮箱前缀只能包含字母、数字、点、下划线和连字符', trigger: 'blur' }
+        ]
+        rules.emailSuffix = [{ required: true, message: '请选择邮箱后缀', trigger: 'change' }]
+      } else {
+        rules.email = [
+          { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+          { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+        ]
+        delete rules.emailPrefix
+        delete rules.emailSuffix
+      }
+    }, { immediate: true });
+
 
     // 切换登录还是注册
     const toggleRegisterOrLogin = () => {
@@ -218,12 +230,14 @@ export default {
 
     const handleSubmit = async () => {
       try {
-        await formRef.value.validate()
+        await formRef.value.validate((valid) => {
+          if (!valid) return Promise.reject(new Error('表单验证失败'))
+        })
         loading.value = true
 
         if (isRegister.value) {
           // 注册请求 - 组合邮箱地址
-          const fullEmail = `${form.emailPrefix}@${form.emailSuffix}`
+          const fullEmail = `${form.emailPrefix}${form.emailSuffix}`
           const registerData = {
             nickName: form.nickname,
             email: fullEmail,
@@ -415,14 +429,18 @@ export default {
   box-shadow: none;
 }
 
-.email-container {
+.email-combined-container {
   display: flex;
   width: 100%;
   align-items: center;
   gap: 8px;
 }
 
-.email-prefix {
+.email-combined-item {
+  flex: 1;
+}
+
+.email-combined-item:first-child {
   flex: 2;
 }
 
@@ -433,19 +451,14 @@ export default {
   margin: 0 4px;
 }
 
-.email-suffix {
-  flex: 1;
-  min-width: 120px;
-}
-
-:deep(.email-suffix .el-select__wrapper) {
+:deep(.email-combined-item .el-input__wrapper) {
   background: rgba(31, 41, 55, 0.5);
   border-radius: 8px;
 }
 
-:deep(.email-suffix .el-select__wrapper),
-:deep(.email-suffix .el-select__wrapper.is-focused),
-:deep(.email-suffix .el-select__wrapper:hover) {
+:deep(.email-combined-item .el-input__wrapper),
+:deep(.email-combined-item .el-input__wrapper.is-focus),
+:deep(.email-combined-item .el-input__wrapper:hover) {
   box-shadow: none;
 }
 
