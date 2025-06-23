@@ -45,7 +45,21 @@
                 <el-input v-model="form.nickname" placeholder="昵称" size="large" class="form-input" />
               </el-form-item>
               <el-form-item prop="email">
-                <el-input v-model="form.email" placeholder="电子邮箱" type="email" size="large" class="form-input" />
+                <div v-if="isRegister" class="email-container">
+                  <el-input v-model="form.emailPrefix" placeholder="邮箱前缀" size="large" class="form-input email-prefix" />
+                  <span class="email-at">@</span>
+                  <el-select v-model="form.emailSuffix" placeholder="选择邮箱" size="large" class="form-input email-suffix">
+                    <el-option label="gmail.com" value="gmail.com" />
+                    <el-option label="qq.com" value="qq.com" />
+                    <el-option label="163.com" value="163.com" />
+                    <el-option label="126.com" value="126.com" />
+                    <el-option label="sina.com" value="sina.com" />
+                    <el-option label="hotmail.com" value="hotmail.com" />
+                    <el-option label="outlook.com" value="outlook.com" />
+                    <el-option label="yahoo.com" value="yahoo.com" />
+                  </el-select>
+                </div>
+                <el-input v-else v-model="form.email" placeholder="电子邮箱" type="email" size="large" class="form-input" />
               </el-form-item>
 
               <el-form-item prop="password">
@@ -120,6 +134,8 @@ export default {
     const form = reactive({
       nickname: '',
       email: '',
+      emailPrefix: '',
+      emailSuffix: 'gmail.com',
       password: '',
       verifyCode: '',
       agreeToTerms: false
@@ -163,6 +179,13 @@ export default {
         { required: true, message: '请输入邮箱地址', trigger: 'blur' },
         { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
       ],
+      emailPrefix: [
+        { required: true, message: '请输入邮箱前缀', trigger: 'blur' },
+        { pattern: /^[a-zA-Z0-9._-]+$/, message: '邮箱前缀只能包含字母、数字、点、下划线和连字符', trigger: 'blur' }
+      ],
+      emailSuffix: [
+        { required: true, message: '请选择邮箱后缀', trigger: 'change' }
+      ],
       password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
         { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
@@ -199,10 +222,11 @@ export default {
         loading.value = true
 
         if (isRegister.value) {
-          // 注册请求
+          // 注册请求 - 组合邮箱地址
+          const fullEmail = `${form.emailPrefix}@${form.emailSuffix}`
           const registerData = {
             nickName: form.nickname,
-            email: form.email,
+            email: fullEmail,
             password: form.password,
             verifyCode: form.verifyCode
           }
@@ -213,8 +237,11 @@ export default {
               ElMessage.success('注册成功！')
               // 注册成功后切换到登录状态
               isRegister.value = false
-              // 清空表单
+              // 清空表单，但保留邮箱信息用于登录
+              form.email = `${form.emailPrefix}@${form.emailSuffix}`
               form.password = ''
+              form.emailPrefix = ''
+              form.emailSuffix = 'gmail.com'
             } else {
               ElMessage.error(res.message || '注册失败，请稍后重试')
             }
@@ -385,6 +412,40 @@ export default {
 :deep(.form-input .el-input__wrapper),
 :deep(.form-input .el-input__wrapper.is-focus),
 :deep(.form-input .el-input__wrapper:hover) {
+  box-shadow: none;
+}
+
+.email-container {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+}
+
+.email-prefix {
+  flex: 2;
+}
+
+.email-at {
+  color: #9ca3af;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 4px;
+}
+
+.email-suffix {
+  flex: 1;
+  min-width: 120px;
+}
+
+:deep(.email-suffix .el-select__wrapper) {
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 8px;
+}
+
+:deep(.email-suffix .el-select__wrapper),
+:deep(.email-suffix .el-select__wrapper.is-focused),
+:deep(.email-suffix .el-select__wrapper:hover) {
   box-shadow: none;
 }
 
