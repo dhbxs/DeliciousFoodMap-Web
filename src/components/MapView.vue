@@ -203,17 +203,17 @@ export default {
                   导航
                 </button>
                 <button
-                  onclick="editShop(${shop.id})"
-                  class="el-button el-button--primary"
-                >
-                  编辑
-                </button>
-                <button
-                  onclick="deleteShop(${shop.id})"
-                  class="el-button el-button--danger"
-                >
-                  删除
-                </button>
+                 data-shop-id="${shop.id}"
+                 class="edit-shop-btn el-button el-button--primary"
+               >
+                 编辑
+               </button>
+               <button
+                 data-shop-id="${shop.id}"
+                 class="delete-shop-btn el-button el-button--danger"
+               >
+                 删除
+               </button>
               </div>
             </div>
           `,
@@ -227,6 +227,14 @@ export default {
           infoWindow.open(map.value, marker.getPosition());
           shopService.selectShop(shop);
           store.dispatch("shops/selectShop", shop.id);
+          
+          // 添加事件监听
+          setTimeout(() => {
+            const infoWindowElement = document.querySelector('.amap-info-window');
+            if (infoWindowElement) {
+              infoWindowElement.addEventListener('click', handleInfoWindowClick);
+            }
+          }, 100);
         });
 
         // 添加标记到地图
@@ -330,26 +338,29 @@ export default {
       });
     };
     
-    window.editShop = (shopId) => {
-      store.dispatch("ui/showShopForm", shopId);
-    };
-
-    window.deleteShop = (shopId) => {
-      ElMessageBox.confirm("确定要删除这个店铺吗？", "确认删除", {
-        type: "warning",
-      })
-        .then(async () => {
-          try {
-            await shopService.deleteShop(shopId);
-            ElMessage.success("删除成功");
-
-            // 通知Vuex店铺数据已更新
-            store.dispatch("shops/notifyShopDataUpdate");
-          } catch (error) {
-            ElMessage.error(error.message || "删除失败");
-          }
+    // 添加事件委托处理编辑和删除
+    const handleInfoWindowClick = (e) => {
+      if (e.target.classList.contains('edit-shop-btn')) {
+        const shopId = e.target.dataset.shopId;
+        store.dispatch("ui/showShopForm", shopId);
+      } else if (e.target.classList.contains('delete-shop-btn')) {
+        const shopId = e.target.dataset.shopId;
+        ElMessageBox.confirm("确定要删除这个店铺吗？", "确认删除", {
+          type: "warning",
         })
-        .catch(() => {});
+          .then(async () => {
+            try {
+              await shopService.deleteShop(shopId);
+              ElMessage.success("删除成功");
+
+              // 通知Vuex店铺数据已更新
+              store.dispatch("shops/notifyShopDataUpdate");
+            } catch (error) {
+              ElMessage.error(error.message || "删除失败");
+            }
+          })
+          .catch(() => {});
+      }
     };
 
     // 监听地图中心点和缩放级别变化
@@ -380,6 +391,11 @@ export default {
     onUnmounted(() => {
       if (map.value) {
         map.value.destroy();
+      }
+      // 移除事件监听
+      const infoWindowElement = document.querySelector('.amap-info-window');
+      if (infoWindowElement) {
+        infoWindowElement.removeEventListener('click', handleInfoWindowClick);
       }
     });
 
