@@ -484,8 +484,9 @@ export default {
 }
 
 .category-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(45%, 1fr));
+  display: flex;
+  flex-direction: column;
+  /* grid-template-columns: repeat(auto-fill, minmax(45%, 1fr)); */
   gap: 12px;
   max-height: 300px;
   overflow-y: auto;
@@ -504,12 +505,7 @@ export default {
     width: 100px !important;
   }
 
-@media (max-width: 768px) {
-  .add-category-form,
-  .category-management {
-    padding: 12px;
-  }
-  
+@media (max-width: 768px) {  
   .form-row {
     flex-wrap: nowrap;
     overflow-x: auto;
