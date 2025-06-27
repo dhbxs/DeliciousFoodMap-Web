@@ -70,7 +70,7 @@
                 <el-input v-model="form.password" :placeholder="isRegister ? '设置密码' : '密码'" :type="showPassword ? 'text' : 'password'"
                   size="large" class="form-input">
                   <template #suffix>
-                    <el-icon @click="showPassword = !showPassword" class="password-icon">
+                    <el-icon @click="togglePasswordVisibility" class="password-icon">
                       <View v-if="!showPassword" />
                       <Hide v-else />
                     </el-icon>
@@ -111,12 +111,13 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import { ArrowRight, View, Hide, Platform, Apple } from '@element-plus/icons-vue'
+import { ArrowRight, View, Hide } from '@element-plus/icons-vue'
 import { login, register, getCode } from '@/api/userApi';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex'; // Add Vuex store
+import { debounce, throttle } from '@/utils/debounceThrottle'; // 导入防抖和节流函数
 
 export default {
   name: 'LoginPage',
@@ -124,8 +125,6 @@ export default {
     ArrowRight,
     View,
     Hide,
-    Platform,
-    Apple
   },
   setup() {
     const router = useRouter()
@@ -134,6 +133,11 @@ export default {
     const showPassword = ref(false)
     const loading = ref(false)
     const isRegister = ref(false)
+    
+    // 密码显示/隐藏切换（使用节流避免频繁切换）
+    const togglePasswordVisibility = throttle(() => {
+      showPassword.value = !showPassword.value
+    }, 200)
 
     const form = reactive({
       nickname: '',
@@ -149,8 +153,8 @@ export default {
     const captchaUrl = ref('')
     const captchaLoading = ref(false)
     
-    // 获取验证码
-    const refreshCaptcha = async () => {
+    // 获取验证码（原始函数）
+    const _refreshCaptcha = async () => {
       try {
         captchaLoading.value = true
         const res = await getCode()
@@ -173,9 +177,23 @@ export default {
       }
     }
     
+    // 使用节流优化验证码刷新，防止频繁点击
+    const refreshCaptcha = throttle(_refreshCaptcha, 2000, { leading: true, trailing: false })
+    
     // 组件挂载时获取验证码
     onMounted(() => {
       refreshCaptcha()
+    })
+    
+    // 组件卸载时清理防抖和节流函数
+    onUnmounted(() => {
+      // 取消所有防抖和节流函数
+      if (refreshCaptcha.cancel) refreshCaptcha.cancel()
+      if (toggleRegisterOrLogin.cancel) toggleRegisterOrLogin.cancel()
+      if (handleSubmit.cancel) handleSubmit.cancel()
+      if (validateEmailPrefix.cancel) validateEmailPrefix.cancel()
+      if (validateEmail.cancel) validateEmail.cancel()
+      if (togglePasswordVisibility.cancel) togglePasswordVisibility.cancel()
     })
 
     const rules = {
@@ -204,6 +222,32 @@ export default {
       ]
     };
 
+    // 实时验证函数（使用防抖优化）
+    const validateEmailPrefix = debounce((value) => {
+      if (value && !/^[a-zA-Z0-9._-]+$/.test(value)) {
+        ElMessage.warning('邮箱前缀只能包含字母、数字、点、下划线和连字符')
+      }
+    }, 500)
+    
+    const validateEmail = debounce((value) => {
+      if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+        ElMessage.warning('请输入正确的邮箱地址格式')
+      }
+    }, 500)
+    
+    // 监听表单输入变化，添加实时验证
+    watch(() => form.emailPrefix, (newValue) => {
+      if (isRegister.value && newValue) {
+        validateEmailPrefix(newValue)
+      }
+    })
+    
+    watch(() => form.email, (newValue) => {
+      if (!isRegister.value && newValue) {
+        validateEmail(newValue)
+      }
+    })
+
     watch(isRegister, (newValue) => {
       if (newValue) {
         rules.email = []
@@ -223,12 +267,14 @@ export default {
     }, { immediate: true });
 
 
-    // 切换登录还是注册
-    const toggleRegisterOrLogin = () => {
+    // 切换登录还是注册（使用防抖避免快速切换）
+    const _toggleRegisterOrLogin = () => {
       isRegister.value = !isRegister.value
     };
+    const toggleRegisterOrLogin = debounce(_toggleRegisterOrLogin, 300);
 
-    const handleSubmit = async () => {
+    // 表单提交处理（原始函数）
+    const _handleSubmit = async () => {
       try {
         await formRef.value.validate((valid) => {
           if (!valid) return Promise.reject(new Error('表单验证失败'))
@@ -298,6 +344,9 @@ export default {
         loading.value = false
       }
     }
+    
+    // 使用防抖优化表单提交，防止重复提交
+    const handleSubmit = debounce(_handleSubmit, 1000, true)
 
     return {
       formRef,
@@ -310,7 +359,8 @@ export default {
       toggleRegisterOrLogin,
       captchaUrl,
       captchaLoading,
-      refreshCaptcha
+      refreshCaptcha,
+      togglePasswordVisibility
     }
   }
 }
