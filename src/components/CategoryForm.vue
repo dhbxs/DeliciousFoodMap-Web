@@ -4,6 +4,7 @@
     title="分类管理"
     width="90%"
     max-width="600px"
+    :class="{ 'mobile-dialog': isMobile }"
     @close="handleClose"
   >
     <!-- 添加新分类表单 -->
@@ -15,20 +16,18 @@
         :rules="rules"
         @submit.prevent="handleAddCategory"
       >
-        <div class="form-row">
-          <el-form-item prop="name">
+        <div class="form-row" :class="{ 'mobile-form': isMobile }">
+          <el-form-item prop="name" class="form-item-name">
             <el-input
               v-model="form.name"
               placeholder="分类名称"
-              style="width: 120px"
             />
           </el-form-item>
           
-          <el-form-item prop="icon">
+          <el-form-item prop="icon" class="form-item-icon">
             <el-select
               v-model="form.icon"
               placeholder="请选择图标"
-              style="width: 100px"
             >
               <el-option
                 v-for="icon in iconOptions"
@@ -43,11 +42,11 @@
             </el-select>
           </el-form-item>
           
-          <el-form-item prop="color">
+          <el-form-item prop="color" class="form-item-color">
             <el-color-picker v-model="form.color" />
           </el-form-item>
           
-          <el-form-item>
+          <el-form-item class="form-item-button">
             <el-button
               type="primary"
               @click="handleAddCategory"
@@ -63,25 +62,27 @@
     <!-- 现有分类列表 -->
     <div class="category-management">
       <h4>现有分类</h4>
-      <div class="category-grid">
+      <div class="category-grid" :class="{ 'mobile-grid': isMobile }">
         <div
           v-for="category in categories"
           :key="category.id"
           class="category-card"
+          :class="{ 'mobile-card': isMobile }"
         >
           <div class="category-preview">
-            <div
-              class="category-icon"
+            <div class="category-icon"
               :style="{ backgroundColor: category.color }"
             >
               <svg class="icon" aria-hidden="true" style="font-size: 30px;">
                 <use :xlink:href="category.icon"></use>
               </svg>
             </div>
-            <span class="category-name">{{ category.name }}</span>
-            <span class="category-count">
-              ({{ getCategoryShopCount(category.name) }})
-            </span>
+            <div class="category-info">
+              <span class="category-name">{{ category.name }}</span>
+              <span class="category-count">
+                ({{ getCategoryShopCount(category.name) }})
+              </span>
+            </div>
           </div>
           
           <div class="category-actions">
@@ -111,7 +112,9 @@
     <el-dialog
       v-model="showEditDialog"
       title="编辑分类"
-      width="400px"
+      width="90%"
+      max-width="400px"
+      :class="{ 'mobile-dialog': isMobile }"
       append-to-body
     >
       <el-form
@@ -119,6 +122,7 @@
         :model="editForm"
         :rules="rules"
         label-width="80px"
+        :class="{ 'mobile-edit-form': isMobile }"
       >
         <el-form-item label="名称" prop="name">
           <el-input v-model="editForm.name" />
@@ -181,6 +185,13 @@ export default {
     const editFormRef = ref(null);
     const loading = ref(false);
     const showEditDialog = ref(false);
+
+    // 检测移动端
+    const isMobile = ref(false);
+    
+    const checkMobile = () => {
+      isMobile.value = window.innerWidth <= 768;
+    };
 
     // 表单数据
     const form = ref({
@@ -295,6 +306,10 @@ export default {
       try {
         await categoryService.getCategories();
         await shopService.getShops(); // Load shops for counting
+        
+        // 初始化移动端检测
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
       } catch (error) {
         ElMessage.error('获取数据失败');
       }
@@ -447,6 +462,7 @@ export default {
       loading,
       showEditDialog,
       iconOptions,
+      isMobile,
       getCategoryShopCount,
       handleAddCategory,
       editCategory,
@@ -466,27 +482,21 @@ export default {
   border-radius: 8px;
 }
 
-.form-row .el-input,
-.form-row .el-color-picker,
-.form-row .el-select,
-.form-row .el-select .iconfont {
-  width: 100px !important;
-}
-
 .add-category-form h4 {
   margin: 0 0 16px 0;
   color: #303133;
+  font-size: 16px;
 }
 
 .category-management h4 {
   margin: 0 0 16px 0;
   color: #303133;
+  font-size: 16px;
 }
 
 .category-grid {
   display: flex;
   flex-direction: column;
-  /* grid-template-columns: repeat(auto-fill, minmax(45%, 1fr)); */
   gap: 12px;
   max-height: 300px;
   overflow-y: auto;
@@ -497,51 +507,17 @@ export default {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 16px;
+  align-items: flex-end;
+}
+
+.form-row .el-form-item {
+  margin-bottom: 0;
 }
 
 .form-row .el-input,
-  .form-row .el-color-picker,
-  .form-row .el-select {
-    width: 100px !important;
-  }
-
-@media (max-width: 768px) {  
-  .form-row {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 8px;
-  }
-  
-  .form-row .el-form-item {
-    flex: 0 0 auto;
-    min-width: 100px;
-  }
-  
-  .form-row .el-form-item__content {
-    width: 100px;
-  }
-  
-  .form-row .el-input,
-  .form-row .el-color-picker,
-  .form-row .el-select {
-    width: 100px !important;
-  }
-  
-  .form-row .el-form-item:last-child {
-    margin-left: auto;
-    min-width: 80px;
-  }
-  
-  .category-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .category-actions {
-    margin-top: 8px;
-    justify-content: flex-end;
-  }
+.form-row .el-color-picker,
+.form-row .el-select {
+  width: 200px !important;
 }
 
 .category-card {
@@ -564,35 +540,50 @@ export default {
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
+  gap: 12px;
+}
+
+.category-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .category-icon {
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 8px;
   font-size: 12px;
   color: white;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
 .category-name {
   font-size: 14px;
   color: #303133;
-  margin-right: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .category-count {
   font-size: 12px;
   color: #909399;
+  white-space: nowrap;
 }
 
 .category-actions {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 /* 滚动条样式 */
@@ -612,5 +603,135 @@ export default {
 
 .category-grid::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .add-category-form {
+    padding: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .add-category-form h4,
+  .category-management h4 {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .form-row .el-form-item {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  
+  .form-row .el-input,
+  .form-row .el-color-picker,
+  .form-row .el-select {
+    width: 100% !important;
+  }
+  
+  .form-row .el-input {
+    height: 44px;
+  }
+  
+  .form-row .el-select {
+    height: 44px;
+  }
+  
+  .form-row .el-color-picker {
+    height: 44px;
+    width: 44px !important;
+  }
+  
+  .form-row .el-button {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .category-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .category-preview {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .category-icon {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .category-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .category-name {
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .category-count {
+    font-size: 13px;
+  }
+  
+  .category-actions {
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .category-actions .el-button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .category-grid {
+    max-height: 400px;
+    gap: 16px;
+  }
+  
+  .category-grid::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .category-grid::-webkit-scrollbar-thumb {
+    background: #d1d1d1;
+    border-radius: 3px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .add-category-form {
+    padding: 10px;
+  }
+  
+  .category-card {
+    padding: 12px;
+  }
+  
+  .category-name {
+    font-size: 15px;
+  }
+  
+  .category-actions .el-button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
 }
 </style>
