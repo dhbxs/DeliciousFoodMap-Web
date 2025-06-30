@@ -62,6 +62,8 @@
     <!-- 现有分类列表 -->
     <div class="category-management">
       <h4>现有分类</h4>
+      <!-- 增加区域线 -->
+      <div class="category-grid-line"></div>
       <div class="category-grid" :class="{ 'mobile-grid': isMobile }">
         <div
           v-for="category in categories"
@@ -396,9 +398,6 @@ export default {
 <style scoped>
 .add-category-form {
   margin-bottom: 24px;
-  padding: 16px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
 }
 
 .add-category-form h4 {
@@ -426,7 +425,7 @@ export default {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 16px;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .form-row .el-form-item {
@@ -527,7 +526,7 @@ export default {
 /* 移动端优化 */
 @media (max-width: 768px) {
   :deep(.el-dialog) {
-    width: 85% !important;
+    width: 90% !important;
     height: 80% !important;
     display: flex !important;
     flex-direction: column !important;
@@ -538,7 +537,6 @@ export default {
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
-    padding: 16px !important;
   }
   
   .add-category-form {
@@ -601,7 +599,6 @@ export default {
   .form-row .form-item-button {
     display: inline-block;
     width: calc(50% - 8px) !important;
-    margin-right: 16px;
   }
   
   .form-row .form-item-button {
@@ -678,6 +675,19 @@ export default {
     background: #d1d1d1;
     border-radius: 3px;
   }
+
+  :deep(.el-color-picker__trigger) {
+    height: 45px;
+    width: 45px;
+  }
+}
+
+.category-grid-line {
+  height: 1px;
+  background-color: #ebeef5;
+  margin-bottom: 10px;
+  border: 1px solid #ebeef5;
+  padding: 1px;
 }
 
 .color-and-btn-row {
