@@ -1,10 +1,9 @@
 <template>
-  <el-dialog
+  <div>
+    <el-dialog
     v-model="visible"
     title="分类管理"
-    width="90%"
-    max-width="600px"
-    :class="{ 'mobile-dialog': isMobile }"
+    width="700px"
     @close="handleClose"
   >
     <!-- 添加新分类表单 -->
@@ -42,19 +41,20 @@
             </el-select>
           </el-form-item>
           
-          <el-form-item prop="color" class="form-item-color">
-            <el-color-picker v-model="form.color" />
-          </el-form-item>
-          
-          <el-form-item class="form-item-button">
-            <el-button
-              type="primary"
-              @click="handleAddCategory"
-              :loading="loading"
-            >
-              添加
-            </el-button>
-          </el-form-item>
+          <div class="color-and-btn-row">
+            <el-form-item prop="color" class="form-item-color">
+              <el-color-picker v-model="form.color" />
+            </el-form-item>
+            <el-form-item class="form-item-button">
+              <el-button
+                type="primary"
+                @click="handleAddCategory"
+                :loading="loading"
+              >
+                添加
+              </el-button>
+            </el-form-item>
+          </div>
         </div>
       </el-form>
     </div>
@@ -162,6 +162,7 @@
       <el-button @click="handleClose">关闭</el-button>
     </template>
   </el-dialog>
+  </div>
 </template>
 
 <script>
@@ -171,6 +172,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { Edit, Delete } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
+import { iconList } from '@/consts/icon';
 
 export default {
   name: "CategoryForm",
@@ -201,86 +203,7 @@ export default {
     });
     
     // 图标选项
-    const iconOptions = ref([
-      "#food-icon-a-001-drink",
-      "#food-icon-a-011-food",
-      "#food-icon-a-005-snack",
-      "#food-icon-a-003-food",
-      "#food-icon-a-009-snack",
-      "#food-icon-a-002-food",
-      "#food-icon-a-013-food",
-      "#food-icon-a-019-food",
-      "#food-icon-a-007-food",
-      "#food-icon-a-012-bread",
-      "#food-icon-a-004-meat",
-      "#food-icon-a-017-strawberry",
-      "#food-icon-a-006-strawberry",
-      "#food-icon-a-020-cheese",
-      "#food-icon-a-015-food",
-      "#food-icon-a-018-strawberry",
-      "#food-icon-a-010-food",
-      "#food-icon-a-028-healthy",
-      "#food-icon-a-012-drink",
-      "#food-icon-a-030-drink",
-      "#food-icon-a-005-softdrinkcan",
-      "#food-icon-a-018-hotamericano",
-      "#food-icon-a-026-drink",
-      "#food-icon-a-024-drink",
-      "#food-icon-a-001-sweet",
-      "#food-icon-a-003-whiskey",
-      "#food-icon-a-008-drink",
-      "#food-icon-a-002-drink",
-      "#food-icon-a-009-sweet",
-      "#food-icon-a-006-drink",
-      "#food-icon-a-007-strawberry",
-      "#food-icon-a-004-cup",
-      "#food-icon-a-022-glass",
-      "#food-icon-a-015-drink",
-      "#food-icon-a-013-drink",
-      "#food-icon-a-025-drink",
-      "#food-icon-a-017-drink",
-      "#food-icon-a-014-glass",
-      "#food-icon-a-019-alcohol",
-      "#food-icon-a-016-moccha",
-      "#food-icon-a-020-milk",
-      "#food-icon-a-023-drink",
-      "#food-icon-a-021-milk",
-      "#food-icon-a-027-tropical",
-      "#food-icon-a-029-drink",
-      "#food-icon-a-010-fruit",
-      "#food-icon-a-028-healthy",
-      "#food-icon-a-012-drink",
-      "#food-icon-a-030-drink",
-      "#food-icon-a-005-softdrinkcan",
-      "#food-icon-a-018-hotamericano",
-      "#food-icon-a-026-drink",
-      "#food-icon-a-024-drink",
-      "#food-icon-a-001-sweet",
-      "#food-icon-a-003-whiskey",
-      "#food-icon-a-008-drink",
-      "#food-icon-a-002-drink",
-      "#food-icon-a-009-sweet",
-      "#food-icon-a-006-drink",
-      "#food-icon-a-007-strawberry",
-      "#food-icon-a-004-cup",
-      "#food-icon-a-022-glass",
-      "#food-icon-a-015-drink",
-      "#food-icon-a-013-drink",
-      "#food-icon-a-025-drink",
-      "#food-icon-a-017-drink",
-      "#food-icon-a-014-glass",
-      "#food-icon-a-019-alcohol",
-      "#food-icon-a-016-moccha",
-      "#food-icon-a-020-milk",
-      "#food-icon-a-023-drink",
-      "#food-icon-a-021-milk",
-      "#food-icon-a-027-tropical",
-      "#food-icon-a-029-drink",
-      "#food-icon-a-010-fruit",
-      "#food-icon-a-028-healthy",
-      "#food-icon-a-012-drink",
-      "#food-icon-a-030-drink"
-    ]);
+    const iconOptions = ref(iconList);
     
     const editForm = ref({
       id: null,
@@ -305,11 +228,7 @@ export default {
     onMounted(async () => {
       try {
         await categoryService.getCategories();
-        await shopService.getShops(); // Load shops for counting
-        
-        // 初始化移动端检测
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
+        await shopService.getShops(); // Load shops for counting        
       } catch (error) {
         ElMessage.error('获取数据失败');
       }
@@ -607,15 +526,38 @@ export default {
 
 /* 移动端优化 */
 @media (max-width: 768px) {
+  :deep(.el-dialog) {
+    width: 85% !important;
+    height: 80% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  :deep(.el-dialog__body) {
+    flex: 1 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 16px !important;
+  }
+  
   .add-category-form {
     padding: 12px;
     margin-bottom: 20px;
+    flex-shrink: 0;
   }
   
   .add-category-form h4,
   .category-management h4 {
     font-size: 15px;
     margin-bottom: 12px;
+  }
+  
+  .category-management {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
   
   .form-row {
@@ -652,6 +594,28 @@ export default {
     width: 100%;
     height: 44px;
     font-size: 16px;
+  }
+  
+  /* 颜色选择器和按钮并排 */
+  .form-row .form-item-color,
+  .form-row .form-item-button {
+    display: inline-block;
+    width: calc(50% - 8px) !important;
+    margin-right: 16px;
+  }
+  
+  .form-row .form-item-button {
+    margin-right: 0;
+  }
+  
+  .form-row .form-item-color .el-color-picker {
+    width: 100% !important;
+    height: 44px;
+  }
+  
+  .form-row .form-item-button .el-button {
+    width: 100%;
+    height: 44px;
   }
   
   .category-card {
@@ -701,7 +665,8 @@ export default {
   }
   
   .category-grid {
-    max-height: 400px;
+    flex: 1;
+    overflow-y: auto;
     gap: 16px;
   }
   
@@ -715,23 +680,12 @@ export default {
   }
 }
 
-/* 超小屏幕优化 */
-@media (max-width: 480px) {
-  .add-category-form {
-    padding: 10px;
-  }
-  
-  .category-card {
-    padding: 12px;
-  }
-  
-  .category-name {
-    font-size: 15px;
-  }
-  
-  .category-actions .el-button {
-    padding: 6px 10px;
-    font-size: 13px;
-  }
+.color-and-btn-row {
+  display: flex;
+  gap: 12px;
+}
+.color-and-btn-row .el-form-item {
+  flex: 1;
+  margin-bottom: 0;
 }
 </style>

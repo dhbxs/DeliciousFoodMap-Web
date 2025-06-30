@@ -199,24 +199,6 @@ export default {
             // 添加店铺
             await shopService.addShop(shopData);
             ElMessage.success("店铺添加成功");
-
-            // // 如果分类不存在，自动添加
-            // const existingCategory = categoryService.getCategoryByName(form.value.category);
-            // if (!existingCategory) {
-            //   try {
-            //     await categoryService.addCategory({
-            //       name: form.value.category,
-            //       color: "#409eff",
-            //       icon: "#food-icon-a-001-drink",
-            //     });
-            //     ElMessage.success(`新分类"${form.value.category}"已自动添加`);
-
-            //     // 通知Vuex分类已更新
-            //     store.dispatch("categories/notifyCategoryUpdate");
-            //   } catch (error) {
-            //     console.warn("自动添加分类失败:", error);
-            //   }
-            // }
           }
 
           // 关闭表单
