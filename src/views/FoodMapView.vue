@@ -331,7 +331,7 @@ export default {
 .mobile-menu-btn,
 .mobile-add-btn {
   width: 44px;
-  height: 44px;
+  aspect-ratio: 1;
   border-radius: var(--radius-full);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
@@ -668,7 +668,6 @@ export default {
   .mobile-menu-btn,
   .mobile-add-btn {
     width: 40px;
-    height: 40px;
   }
 
   .main-layout.mobile {
@@ -699,7 +698,6 @@ export default {
   .mobile-menu-btn,
   .mobile-add-btn {
     width: 36px;
-    height: 36px;
   }
 
   .main-layout.mobile {
