@@ -3,7 +3,7 @@
     <el-dialog
     v-model="visible"
     title="分类管理"
-    width="700px"
+    width="800px"
     @close="handleClose"
   >
     <!-- 添加新分类表单 -->
@@ -81,9 +81,10 @@
             </div>
             <div class="category-info">
               <span class="category-name">{{ category.name }}</span>
-              <span class="category-count">
+              <!-- <span class="category-count">
                 ({{ getCategoryShopCount(category.name) }})
               </span>
+               -->
             </div>
           </div>
           
@@ -114,8 +115,7 @@
     <el-dialog
       v-model="showEditDialog"
       title="编辑分类"
-      width="90%"
-      max-width="400px"
+      width="400px"
       :class="{ 'mobile-dialog': isMobile }"
       append-to-body
     >
@@ -130,7 +130,7 @@
           <el-input v-model="editForm.name" />
         </el-form-item>
         <el-form-item label="图标" prop="icon">
-          <el-select v-model="editForm.icon" placeholder="请选择图标" style="width: 100px">
+          <el-select v-model="editForm.icon" placeholder="请选择图标" style="width: 200px">
             <el-option
               v-for="icon in iconOptions"
               :key="icon"
@@ -396,46 +396,50 @@ export default {
 </script>
 
 <style scoped>
+/* 精简后的样式 */
 .add-category-form {
-  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
 }
 
-.add-category-form h4 {
-  margin: 0 0 16px 0;
-  color: #303133;
-  font-size: 16px;
-}
-
+.add-category-form h4,
 .category-management h4 {
   margin: 0 0 16px 0;
   color: #303133;
   font-size: 16px;
 }
 
-.category-grid {
+.category-management {
+  flex: 1;
+  padding: 16px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  max-height: 300px;
+  flex: 1;
   overflow-y: auto;
+  max-height: 300px;
 }
 
 .form-row {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
-  align-items: flex-start;
+  align-items: flex-end;
 }
 
-.form-row .el-form-item {
-  margin-bottom: 0;
-}
-
+.form-row .el-form-item,
 .form-row .el-input,
 .form-row .el-color-picker,
 .form-row .el-select {
   width: 200px !important;
+  margin-bottom: 0;
 }
 
 .category-card {
@@ -444,7 +448,7 @@ export default {
   align-items: center;
   padding: 12px;
   border: 1px solid #ebeef5;
-  border-radius: 8px;
+  border-radius: 10px;
   background: white;
   transition: all 0.3s ease;
 }
@@ -487,43 +491,10 @@ export default {
   font-size: 14px;
   color: #303133;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.category-count {
-  font-size: 12px;
-  color: #909399;
-  white-space: nowrap;
-}
-
-.category-actions {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-/* 滚动条样式 */
-.category-grid::-webkit-scrollbar {
-  width: 4px;
-}
-
-.category-grid::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
-}
-
-.category-grid::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
-}
-
-.category-grid::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-/* 移动端优化 */
 @media (max-width: 768px) {
   :deep(.el-dialog) {
     width: 90% !important;
@@ -531,155 +502,105 @@ export default {
     display: flex !important;
     flex-direction: column !important;
   }
-  
   :deep(.el-dialog__body) {
     flex: 1 !important;
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
   }
-  
   .add-category-form {
     padding: 12px;
     margin-bottom: 20px;
     flex-shrink: 0;
   }
-  
   .add-category-form h4,
   .category-management h4 {
     font-size: 15px;
     margin-bottom: 12px;
   }
-  
-  .category-management {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  
   .form-row {
     flex-direction: column;
     gap: 16px;
     margin-bottom: 20px;
   }
-  
-  .form-row .el-form-item {
-    width: 100%;
-    margin-bottom: 0;
-  }
-  
+  .form-row .el-form-item,
   .form-row .el-input,
   .form-row .el-color-picker,
   .form-row .el-select {
     width: 100% !important;
   }
-  
-  .form-row .el-input {
-    height: 44px;
-  }
-  
+  .form-row .el-input,
   .form-row .el-select {
     height: 44px;
   }
-  
   .form-row .el-color-picker {
     height: 44px;
     width: 44px !important;
   }
-  
   .form-row .el-button {
     width: 100%;
     height: 44px;
     font-size: 16px;
   }
-  
-  /* 颜色选择器和按钮并排 */
-  .form-row .form-item-color,
-  .form-row .form-item-button {
-    display: inline-block;
-    width: calc(50% - 8px) !important;
-  }
-  
-  .form-row .form-item-button {
-    margin-right: 0;
-  }
-  
-  .form-row .form-item-color .el-color-picker {
-    width: 100% !important;
-    height: 44px;
-  }
-  
-  .form-row .form-item-button .el-button {
-    width: 100%;
-    height: 44px;
-  }
-  
   .category-card {
     flex-direction: column;
     align-items: stretch;
     padding: 16px;
     gap: 12px;
   }
-  
-  .category-preview {
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 12px;
-  }
-  
   .category-icon {
     width: 48px;
     height: 48px;
   }
-  
-  .category-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-  }
-  
   .category-name {
     font-size: 16px;
     font-weight: 500;
   }
-  
   .category-count {
     font-size: 13px;
   }
-  
   .category-actions {
+    display: flex;
     justify-content: flex-end;
     gap: 8px;
   }
-  
   .category-actions .el-button {
     padding: 8px 12px;
     font-size: 14px;
   }
-  
   .category-grid {
-    flex: 1;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
+    max-height: none;
   }
-  
   .category-grid::-webkit-scrollbar {
     width: 6px;
   }
-  
   .category-grid::-webkit-scrollbar-thumb {
     background: #d1d1d1;
     border-radius: 3px;
   }
-
   :deep(.el-color-picker__trigger) {
     height: 45px;
     width: 45px;
   }
+}
+
+.color-and-btn-row {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+}
+
+.color-and-btn-row .form-item-color {
+  width: 120px;
+  min-width: 80px;
+}
+
+.color-and-btn-row .form-item-button {
+  width: 100px;
+  min-width: 80px;
 }
 
 .category-grid-line {
@@ -688,14 +609,5 @@ export default {
   margin-bottom: 10px;
   border: 1px solid #ebeef5;
   padding: 1px;
-}
-
-.color-and-btn-row {
-  display: flex;
-  gap: 12px;
-}
-.color-and-btn-row .el-form-item {
-  flex: 1;
-  margin-bottom: 0;
 }
 </style>
