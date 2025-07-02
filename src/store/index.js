@@ -3,6 +3,7 @@ import shops from "./modules/shops";
 import categories from "./modules/categories";
 import ui from "./modules/ui";
 import user from "./modules/user";
+import environment from "./modules/environment";
 import createPersistedState from 'vuex-persistedstate';
 
 export default createStore({
@@ -15,6 +16,7 @@ export default createStore({
     categories,
     ui,
     user,
+    environment,
   },
   plugins: [
     // veux持久化配置

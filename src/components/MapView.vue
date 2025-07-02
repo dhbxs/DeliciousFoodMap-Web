@@ -27,6 +27,7 @@ import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useStore } from "vuex";
 import { Plus, Location } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { isAmapLoaded, getAMap } from "@/utils/amapLoader";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
 
@@ -86,10 +87,13 @@ export default {
 
     // 初始化地图
     const initMap = () => {
-      if (!mapContainer.value || !window.AMap) return;
+      if (!mapContainer.value || !isAmapLoaded()) return;
+
+      const AMap = getAMap();
+      if (!AMap) return;
 
       // 创建高德地图实例
-      map.value = new window.AMap.Map(mapContainer.value, {
+      map.value = new AMap.Map(mapContainer.value, {
         center: [mapCenter.value[1], mapCenter.value[0]], // 高德地图使用[lng, lat]格式
         zoom: mapZoom.value,
         mapStyle: "amap://styles/normal", // 标准地图样式
@@ -98,8 +102,8 @@ export default {
       });
 
       // 添加地图控件
-      map.value.addControl(new window.AMap.Scale());
-      map.value.addControl(new window.AMap.ToolBar({
+      map.value.addControl(new AMap.Scale());
+      map.value.addControl(new AMap.ToolBar({
           position: { bottom: "50px", left: "10px" }, // 控制条位置
           visible: true, // 是否显示
           Locate: true, // 定位按钮
@@ -170,16 +174,17 @@ export default {
         }
 
         // 创建自定义标记
-        const marker = new window.AMap.Marker({
+        const AMap = getAMap();
+        const marker = new AMap.Marker({
           position: [lng, lat], // 高德地图使用[lng, lat]格式
           content: createCustomMarkerContent(shop),
-          offset: new window.AMap.Pixel(-15, -15), // 标记偏移量
+          offset: new AMap.Pixel(-15, -15), // 标记偏移量
         });
 
         shop.description = shop.description || "暂无描述";
 
         // 创建信息窗体 (优化样式 - 简化结构)
-        const infoWindow = new window.AMap.InfoWindow({
+        const infoWindow = new AMap.InfoWindow({
           content: `
             <div class="amap-info-window">
               <h4 class="shop-title">${shop.name}</h4>
@@ -253,11 +258,12 @@ export default {
 
     // 定位到用户位置
     const centerToUserLocation = () => {
-      if (!map.value) return;
+      if (!map.value || !isAmapLoaded()) return;
 
+      const AMap = getAMap();
       // 使用高德地图的定位插件
-      window.AMap.plugin("AMap.Geolocation", () => {
-        const geolocation = new window.AMap.Geolocation({
+      AMap.plugin("AMap.Geolocation", () => {
+        const geolocation = new AMap.Geolocation({
           enableHighAccuracy: true, // 是否使用高精度定位
           timeout: 10000, // 超时时间
           maximumAge: 0, // 定位结果缓存0毫秒
@@ -308,8 +314,11 @@ export default {
 
     // 全局函数，供弹窗按钮调用
     window.navigationToShop = (lng, lat) => {
-      window.AMap.plugin("AMap.Geolocation", () => {
-        const geolocation = new window.AMap.Geolocation({
+      if (!isAmapLoaded()) return;
+
+      const AMap = getAMap();
+      AMap.plugin("AMap.Geolocation", () => {
+        const geolocation = new AMap.Geolocation({
           enableHighAccuracy: true, // 是否使用高精度定位
           timeout: 10000, // 超时时间
           maximumAge: 0, // 定位结果缓存0毫秒
@@ -385,7 +394,16 @@ export default {
     });
 
     onMounted(() => {
-      initMap();
+      // 等待 AMap API 加载完成后再初始化地图
+      const checkAndInitMap = () => {
+        if (isAmapLoaded()) {
+          initMap();
+        } else {
+          // 如果 AMap 还未加载，等待一段时间后重试
+          setTimeout(checkAndInitMap, 100);
+        }
+      };
+      checkAndInitMap();
     });
 
     onUnmounted(() => {
