@@ -508,6 +508,10 @@ export default {
   overflow: hidden;
 }
 
+.category-actions .el-button {
+  color: #fff;
+}
+
 @media (max-width: 768px) {
   :deep(.el-dialog) {
     width: 90% !important;
@@ -576,6 +580,7 @@ export default {
   .category-actions .el-button {
     padding: 8px 12px;
     font-size: 14px;
+    color: #fff
   }
 
   .category-grid {

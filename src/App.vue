@@ -11,7 +11,8 @@
   --primary-color: #667eea;
   --primary-light: #764ba2;
   --primary-dark: #5a67d8;
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #c28df7 100%);
+  --button-gradient: linear-gradient(135deg, #516ef1 0%, #3238ec 100%); 
 
   /* 辅助色 */
   --secondary-color: #f093fb;
@@ -157,7 +158,7 @@ body {
 }
 
 .el-button--primary {
-  background: var(--primary-gradient);
+  background: var(--button-gradient);
   color: var(--text-inverse);
   box-shadow: var(--shadow-md);
 }
