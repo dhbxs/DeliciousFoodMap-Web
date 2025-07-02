@@ -8,13 +8,8 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
     <script src="./iconfont/iconfont.js"></script>
     <!-- <link rel="stylesheet" href="/public/iconfont/iconfont.css"> -->
-    <!-- 高德地图API -->
-    <!-- 请将YOUR_AMAP_KEY替换为您的高德地图API密钥 -->
+    <!-- 高德地图API将在运行时动态加载 -->
     <!-- 申请地址：https://console.amap.com/dev/key/app -->
-    <script
-      type="text/javascript"
-      src="https://webapi.amap.com/maps?v=2.0&key=<%= process.env.VUE_APP_AMAP_KEY %>&plugin=AMap.Scale,AMap.ToolBar,AMap.ControlBar,AMap.Geolocation"
-    ></script>
   </head>
   <body>
     <noscript>

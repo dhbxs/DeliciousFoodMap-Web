@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: delicious-food-map-web
+    ports:
+      - "80:80"
+    environment:
+      - API_BASE_URL=https://your-api-server.com
+      - AMAP_KEY=your_amap_key_here
+    restart: unless-stopped
+
