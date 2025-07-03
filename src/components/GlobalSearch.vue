@@ -50,24 +50,40 @@
           v-for="result in searchResults"
           :key="result.id"
           class="result-item"
-          @click="selectResult(result)"
+          @click="jumpToLocation(result)"
         >
           <div class="result-content">
             <div class="result-header">
               <span class="result-name">{{ result.name }}</span>
-              <span class="result-category" :style="{ color: getCategoryColor(result.categoryColor) }">
-                <svg class="result-category-icon" aria-hidden="true">
-                  <use :xlink:href="result.categoryIcon"></use>
-                </svg>
+              <span class="result-category-group">
+                <span class="result-category" :style="{ color: getCategoryColor(result.categoryColor) }">
+                  <svg class="result-category-icon" aria-hidden="true">
+                    <use :xlink:href="result.categoryIcon"></use>
+                  </svg>
+                </span>
+                <span class="result-category">{{ result.categoryName }}</span>
               </span>
-              <span class="result-category">{{ result.categoryName }}</span>
             </div>
             <div class="result-address">
               <el-icon class="location-icon"><Location /></el-icon>
               {{ result.address }}
             </div>
-            <div v-if="result.description" class="result-description">
-              {{ result.description }}
+            <div v-if="result.description" class="result-description-wrapper">
+              <div
+                class="result-description"
+                :class="{ 'collapsed': isDescriptionCollapsed(result.id), 'expanded': !isDescriptionCollapsed(result.id) }"
+              >
+                {{ getDisplayDescription(result) }}
+              </div>
+              <el-button
+                v-if="shouldShowExpandButton(result)"
+                type="text"
+                size="small"
+                class="expand-btn"
+                @click.stop="toggleDescriptionExpand(result.id)"
+              >
+                {{ isDescriptionCollapsed(result.id) ? (isMobile ? '展开' : '展开全部') : (isMobile ? '收起' : '收起内容') }}
+              </el-button>
             </div>
           </div>
           <div class="result-actions">
@@ -139,7 +155,6 @@ export default {
     const searchResults = ref([]);
     const showResults = ref(false);
     const searching = ref(false);
-    const inputFocused = ref(false);
     
     // 计算属性
     const isMobile = computed(() => store.getters['ui/isMobile']);
@@ -151,12 +166,6 @@ export default {
     const getCategoryColor = (categoryName) => {
       const category = categoryService.getCategoryByName(categoryName);
       return category?.color || '#409eff';
-    };
-    
-    // 获取分类图标
-    const getCategoryIcon = (categoryName) => {
-      const category = categoryService.getCategoryByName(categoryName);
-      return category?.icon || '🍽️';
     };
     
     // 处理搜索输入
@@ -216,12 +225,10 @@ export default {
     
     // 处理输入框聚焦
     const handleFocus = () => {
-      inputFocused.value = true;
       // 如果有搜索结果，显示它们
       if (searchResults.value.length > 0) {
         showResults.value = true;
       }
-
       // 移动端聚焦时滚动到搜索框
       if (isMobile.value) {
         nextTick(() => {
@@ -238,18 +245,7 @@ export default {
     
     // 处理输入框失焦
     const handleBlur = () => {
-      inputFocused.value = false;
-      // 延迟关闭结果，允许点击结果项
-      setTimeout(() => {
-        if (!inputFocused.value) {
-          // showResults.value = false; // 不自动关闭，让用户手动关闭
-        }
-      }, 200);
-    };
-    
-    // 选择搜索结果
-    const selectResult = (result) => {
-      jumpToLocation(result);
+      // 保留空函数，便于后续扩展
     };
     
     // 跳转到位置
@@ -304,6 +300,27 @@ export default {
       }
     });
     
+    // 展开/收起描述相关逻辑
+    const DESCRIPTION_LIMIT = 50;
+    const expandedDescriptions = ref({}); // { [id]: true/false }
+
+    const isDescriptionCollapsed = (id) => {
+      return !expandedDescriptions.value[id];
+    };
+    const toggleDescriptionExpand = (id) => {
+      expandedDescriptions.value[id] = !expandedDescriptions.value[id];
+    };
+    const shouldShowExpandButton = (result) => {
+      return result.description && result.description.length > DESCRIPTION_LIMIT;
+    };
+    const getDisplayDescription = (result) => {
+      if (!shouldShowExpandButton(result)) return result.description;
+      if (isDescriptionCollapsed(result.id)) {
+        return result.description.slice(0, DESCRIPTION_LIMIT) + '...';
+      }
+      return result.description;
+    };
+    
     return {
       searchKeyword,
       searchResults,
@@ -311,14 +328,16 @@ export default {
       searching,
       isMobile,
       getCategoryColor,
-      getCategoryIcon,
       handleSearchInput,
       handleFocus,
       handleBlur,
       performSearch,
-      selectResult,
       jumpToLocation,
       closeResults,
+      isDescriptionCollapsed,
+      toggleDescriptionExpand,
+      shouldShowExpandButton,
+      getDisplayDescription,
     };
   },
 };
@@ -504,13 +523,25 @@ export default {
   align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-sm);
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ececec;
+  justify-content: space-between;
 }
 
 .result-name {
+  flex: 1 1 auto;
   font-weight: 700;
   color: var(--text-primary);
   font-size: 16px;
   line-height: 1.3;
+  text-align: left;
+}
+
+.result-category-group {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  gap: 4px;
 }
 
 .result-category {
@@ -521,6 +552,16 @@ export default {
   white-space: nowrap;
   font-weight: 600;
   border: 1px solid rgba(102, 126, 234, 0.2);
+  margin-left: 8px;
+  text-align: right;
+}
+
+.result-category-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: var(--spacing-xs);
+  margin-left: 8px;
+  text-align: right;
 }
 
 .result-address {
@@ -531,6 +572,8 @@ export default {
   font-size: 14px;
   margin-bottom: var(--spacing-sm);
   line-height: 1.4;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ececec;
 }
 
 .location-icon {
@@ -538,17 +581,35 @@ export default {
   color: var(--primary-color);
 }
 
-.result-description {
-  color: var(--text-tertiary);
-  font-size: 13px;
-  line-height: 1.5;
+.result-description-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 0;
+  /* 最后一个块不加分割线 */
+}
+.result-description.collapsed {
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  background: var(--gray-50);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  border-left: 3px solid var(--primary-color);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  max-height: 3.2em;
+}
+.result-description.expanded {
+  white-space: pre-line;
+  overflow: visible;
+  max-height: none;
+}
+.expand-btn {
+  align-self: flex-end;
+  font-size: 12px;
+  color: var(--primary-color);
+  padding: 0 4px;
+  height: auto;
+  line-height: 1;
 }
 
 .result-actions {
@@ -765,6 +826,51 @@ export default {
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
   }
+
+  .expand-btn {
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  .result-header,
+  .result-address,
+  .result-description-wrapper {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+  }
+
+  .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    justify-content: flex-start !important;
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+  }
+  .result-name {
+    font-size: 15px;
+    margin-bottom: var(--spacing-xs);
+    text-align: left !important;
+  }
+  .result-category-group {
+    margin-left: 0 !important;
+    text-align: left !important;
+    gap: 4px;
+  }
+  .result-category {
+    font-size: 11px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    align-self: flex-start;
+    margin-left: 0;
+    text-align: left;
+  }
+  .result-category-icon {
+    margin-left: 0;
+    margin-right: var(--spacing-xs);
+    width: 20px;
+    height: 20px;
+  }
 }
 
 /* 滚动条样式 */
@@ -974,10 +1080,5 @@ export default {
     height: 44px;
     font-size: 14px;
   }
-}
-.result-category-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: var(--spacing-xs);
 }
 </style>
