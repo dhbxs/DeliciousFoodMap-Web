@@ -14,6 +14,10 @@ build
 .env.local
 .env.*.local
 
+# Configuration files (runtime generated)
+public/config.json
+
+
 # IDE and editor files
 .vscode
 .idea
