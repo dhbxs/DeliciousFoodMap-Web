@@ -1,8 +1,5 @@
 import { createApp } from "vue";
-import App from "./App.vue";
-import router from "./router";
 import store from "./store";
-import { loadAmapAPI } from "./utils/amapLoader";
 import "../public/iconfont/iconfont.css";
 import "../public/iconfont/iconfont.js";
 import "@/assets/css/iconfont-symbol.css";
@@ -16,6 +13,14 @@ async function initializeApp() {
     console.log("Loading application configuration...");
     await store.dispatch("environment/loadConfig");
     console.log("Configuration loaded successfully");
+
+    const [{ default: App }, { default: router }, { loadAmapAPI }] =
+      await Promise.all([
+        import("./App.vue"),
+        import("./router"),
+        import("./utils/amapLoader"),
+      ]);
+
     const amapKey = store.getters["environment/amapKey"];
     if (amapKey) {
       console.log("Loading AMap API...");

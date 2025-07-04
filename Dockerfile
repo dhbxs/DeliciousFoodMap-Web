@@ -32,7 +32,7 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/default.conf /etc/nginx/conf.d/default.conf
 
 # Copy config template for runtime substitution
-COPY public/config.json /usr/share/nginx/html/config.json.template
+COPY public/config.json.template /usr/share/nginx/html/config.json.template
 
 # Copy startup script
 COPY docker/docker-entrypoint.sh /docker-entrypoint.sh
@@ -44,6 +44,8 @@ ENV AMAP_KEY=""
 
 # Expose port
 EXPOSE 80
+
+EXPOSE 443
 
 
 
