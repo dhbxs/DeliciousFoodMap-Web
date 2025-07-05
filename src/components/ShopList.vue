@@ -82,14 +82,13 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Search, Edit, Delete, Location, Plus, Refresh } from "@element-plus/icons-vue";
+import { Edit, Delete, Location, Plus, Refresh } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
 
 export default {
   name: "ShopList",
   components: {
-    Search,
     Edit,
     Delete,
     Location,

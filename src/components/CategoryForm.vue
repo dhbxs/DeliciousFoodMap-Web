@@ -15,7 +15,7 @@
         :rules="rules"
         @submit.prevent="handleAddCategory"
       >
-        <div class="form-row" :class="{ 'mobile-form': isMobile }">
+        <div class="form-row">
           <div class="form-row-1">
             <div class="form-item-name">
               <el-input
@@ -65,12 +65,11 @@
       <h4>现有分类</h4>
       <!-- 增加区域线 -->
       <div class="category-grid-line"></div>
-      <div class="category-grid" :class="{ 'mobile-grid': isMobile }">
+      <div class="category-grid">
         <div
           v-for="category in categories"
           :key="category.id"
           class="category-card"
-          :class="{ 'mobile-card': isMobile }"
         >
           <div class="category-preview">
             <div class="category-icon"
@@ -93,19 +92,19 @@
             <el-button
               size="small"
               type="primary"
+              icon="edit"
               text
               @click="editCategory(category)"
             >
-              <el-icon><Edit /></el-icon>
             </el-button>
             <el-button
               size="small"
               type="danger"
+              icon="delete"
               text
               @click="deleteCategory(category)"
               :disabled="getCategoryShopCount(category.name) > 0"
             >
-              <el-icon><Delete /></el-icon>
             </el-button>
           </div>
         </div>
@@ -117,7 +116,6 @@
       v-model="showEditDialog"
       title="编辑分类"
       width="400px"
-      :class="{ 'mobile-dialog': isMobile }"
       append-to-body
     >
       <el-form
@@ -125,7 +123,6 @@
         :model="editForm"
         :rules="rules"
         label-width="80px"
-        :class="{ 'mobile-edit-form': isMobile }"
       >
         <el-form-item label="名称" prop="name">
           <el-input v-model="editForm.name" />
@@ -172,17 +169,12 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Edit, Delete } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
 import { iconList } from '@/consts/icon';
 
 export default {
   name: "CategoryForm",
-  components: {
-    Edit,
-    Delete,
-  },
   
   setup() {
     const store = useStore();
@@ -191,18 +183,11 @@ export default {
     const loading = ref(false);
     const showEditDialog = ref(false);
 
-    // 检测移动端
-    const isMobile = ref(false);
-    
-    const checkMobile = () => {
-      isMobile.value = window.innerWidth <= 768;
-    };
-
     // 表单数据
     const form = ref({
       name: "",
-      icon: "#food-icon-a-001-drink",
-      color: "#409eff",
+      icon: "",
+      color: "",
     });
     
     // 图标选项
@@ -261,8 +246,8 @@ export default {
     const resetForm = () => {
       form.value = {
         name: "",
-        icon: "#food-icon-a-001-drink",
-        color: "#409eff",
+        icon: "",
+        color: "",
       };
 
       if (formRef.value) {
@@ -384,7 +369,6 @@ export default {
       loading,
       showEditDialog,
       iconOptions,
-      isMobile,
       getCategoryShopCount,
       handleAddCategory,
       editCategory,

@@ -135,14 +135,13 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import { useStore } from 'vuex';
 import { ElMessage } from 'element-plus';
-import { Search, Close, Location } from '@element-plus/icons-vue';
+import { Close, Location } from '@element-plus/icons-vue';
 import shopService from '@/services/ShopService';
 import categoryService from '@/services/CategoryService';
 
 export default {
   name: 'GlobalSearch',
   components: {
-    Search,
     Close,
     Location,
   },
