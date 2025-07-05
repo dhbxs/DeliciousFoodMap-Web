@@ -56,10 +56,10 @@
             <div class="result-header">
               <span class="result-name">{{ result.name }}</span>
               <span class="result-category-group">
-                <span class="result-category" :style="{ color: getCategoryColor(result.categoryColor) }">
-                  <svg class="result-category-icon" aria-hidden="true">
-                    <use :xlink:href="result.categoryIcon"></use>
-                  </svg>
+                <span class="result-category-icon-wrapper">
+                    <svg class="result-category-icon" :style="{ backgroundColor: result.categoryColor }" aria-hidden="true">
+                      <use :xlink:href="result.categoryIcon"></use> 
+                    </svg>
                 </span>
                 <span class="result-category">{{ result.categoryName }}</span>
               </span>
@@ -67,6 +67,15 @@
             <div class="result-address">
               <el-icon class="location-icon"><Location /></el-icon>
               {{ result.address }}
+              <el-button
+                v-if="!isMobile"
+                type="primary"
+                size="small"
+                @click.stop="jumpToLocation(result)"
+                class="jump-btn-inline"
+              >
+                跳转
+              </el-button>
             </div>
             <div v-if="result.description" class="result-description-wrapper">
               <div
@@ -85,15 +94,6 @@
                 {{ isDescriptionCollapsed(result.id) ? (isMobile ? '展开' : '展开全部') : (isMobile ? '收起' : '收起内容') }}
               </el-button>
             </div>
-          </div>
-          <div class="result-actions">
-            <el-button
-              type="primary"
-              size="small"
-              @click.stop="jumpToLocation(result)"
-            >
-              跳转
-            </el-button>
           </div>
         </div>
       </div>
@@ -138,6 +138,7 @@ import { ElMessage } from 'element-plus';
 import { Close, Location } from '@element-plus/icons-vue';
 import shopService from '@/services/ShopService';
 import categoryService from '@/services/CategoryService';
+import { debounce } from '@/utils/debounceThrottle';
 
 export default {
   name: 'GlobalSearch',
@@ -158,33 +159,46 @@ export default {
     // 计算属性
     const isMobile = computed(() => store.getters['ui/isMobile']);
     
-    // 防抖搜索
-    let searchTimeout = null;
-    
-    // 获取分类颜色
-    const getCategoryColor = (categoryName) => {
-      const category = categoryService.getCategoryByName(categoryName);
-      return category?.color || '#409eff';
-    };
-    
-    // 处理搜索输入
-    const handleSearchInput = (value) => {
-      // 清除之前的定时器
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      
-      // 如果输入为空，清空结果
+    // 使用防抖函数
+    const debouncedSearch = debounce(async (value) => {
       if (!value.trim()) {
         searchResults.value = [];
         showResults.value = false;
         return;
       }
       
-      // 防抖搜索
-      searchTimeout = setTimeout(() => {
-        performSearch();
-      }, 300);
+      try {
+        searching.value = true;
+        
+        // 使用 shopService 进行搜索
+        const results = await shopService.searchShops(value.trim());
+        
+        searchResults.value = results;
+        showResults.value = true;
+        
+        // 移动端自动显示结果
+        if (isMobile.value) {
+          nextTick(() => {
+            // 滚动到搜索结果
+            const resultsElement = document.querySelector('.search-results');
+            if (resultsElement) {
+              resultsElement.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+        }
+        
+      } catch (error) {
+        ElMessage.error('搜索失败: ' + (error.message || '未知错误'));
+        searchResults.value = [];
+        showResults.value = false;
+      } finally {
+        searching.value = false;
+      }
+    }, 300);
+    
+    // 处理搜索输入
+    const handleSearchInput = (value) => {
+      debouncedSearch(value);
     };
     
     // 执行搜索
@@ -326,7 +340,6 @@ export default {
       showResults,
       searching,
       isMobile,
-      getCategoryColor,
       handleSearchInput,
       handleFocus,
       handleBlur,
@@ -417,6 +430,7 @@ export default {
 }
 
 .results-header {
+  max-height: 30px !important;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -546,22 +560,22 @@ export default {
 .result-category {
   font-size: 12px;
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
   border-radius: var(--radius-lg);
   white-space: nowrap;
   font-weight: 600;
   border: 1px solid rgba(102, 126, 234, 0.2);
-  margin-left: 8px;
   text-align: right;
 }
 
 .result-category-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: var(--spacing-xs);
-  margin-left: 8px;
-  text-align: right;
+  width: 35px;
+  height: 35px;
+  text-align: right; 
+  border-radius: 50%;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  padding: 2px;
 }
+
 
 .result-address {
   display: flex;
@@ -595,7 +609,7 @@ export default {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  max-height: 3.2em;
+  max-height: 3.4em;
 }
 .result-description.expanded {
   white-space: pre-line;
@@ -609,25 +623,6 @@ export default {
   padding: 0 4px;
   height: auto;
   line-height: 1;
-}
-
-.result-actions {
-  margin-left: var(--spacing-lg);
-  position: relative;
-  z-index: 1;
-}
-
-.result-actions .el-button {
-  border-radius: var(--radius-xl);
-  font-weight: 600;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition-fast);
-}
-
-.result-actions .el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
 }
 
 /* 无结果样式 */
@@ -870,6 +865,10 @@ export default {
     width: 20px;
     height: 20px;
   }
+
+  .result-category-icon-wrapper {
+    padding: 0.1rem !important;
+  }
 }
 
 /* 滚动条样式 */
@@ -940,7 +939,7 @@ export default {
   }
 
   .mobile-results .results-list {
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh - 250px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: var(--spacing-sm);
@@ -1079,5 +1078,22 @@ export default {
     height: 44px;
     font-size: 14px;
   }
+}
+
+/* 在样式中添加PC端跳转按钮的右浮动 */
+.jump-btn-inline {
+  float: right;
+  margin-left: auto;
+  margin-right: 0;
+  border-radius: var(--radius-xl);
+  font-weight: 600;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.jump-btn-inline:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 </style>
