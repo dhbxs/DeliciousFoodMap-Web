@@ -29,6 +29,7 @@ import { Plus, Location } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
+import amapLoader from '@/utils/amapLoader';
 
 export default {
   name: "MapView",
@@ -85,44 +86,56 @@ export default {
     };
 
     // 初始化地图
-    const initMap = () => {
-      if (!mapContainer.value || !window.AMap) return;
+    const initMap = async () => {
+      if (!mapContainer.value) return;
 
-      // 创建高德地图实例
-      map.value = new window.AMap.Map(mapContainer.value, {
-        center: [mapCenter.value[1], mapCenter.value[0]], // 高德地图使用[lng, lat]格式
-        zoom: mapZoom.value,
-        mapStyle: "amap://styles/normal", // 标准地图样式
-        viewMode: "2D", // 2D视图
-        lang: "zh_cn", // 中文
-      });
+      try {
+        // 动态加载AMap脚本
+        await amapLoader.loadAMap();
 
-      // 添加地图控件
-      map.value.addControl(new window.AMap.Scale());
-      map.value.addControl(new window.AMap.ToolBar({
-          position: { bottom: "50px", left: "10px" }, // 控制条位置
-          visible: true, // 是否显示
-          Locate: true, // 定位按钮
-          Zoom: true, // 缩放按钮
-          Scale: true, // 比例尺
+        if (!window.AMap) {
+          throw new Error('AMap failed to load');
         }
-      ));
 
-      // 地图点击事件
-      map.value.on("click", handleMapClick);
-
-      // 地图移动结束事件
-      map.value.on("moveend", () => {
-        const center = map.value.getCenter();
-        const zoom = map.value.getZoom();
-        store.dispatch("ui/setMapState", {
-          center: [center.lat, center.lng],
-          zoom: zoom,
+        // 创建高德地图实例
+        map.value = new window.AMap.Map(mapContainer.value, {
+          center: [mapCenter.value[1], mapCenter.value[0]], // 高德地图使用[lng, lat]格式
+          zoom: mapZoom.value,
+          mapStyle: "amap://styles/normal", // 标准地图样式
+          viewMode: "2D", // 2D视图
+          lang: "zh_cn", // 中文
         });
-      });
 
-      // 添加现有店铺标记
-      addShopMarkers();
+        // 添加地图控件
+        map.value.addControl(new window.AMap.Scale());
+        map.value.addControl(new window.AMap.ToolBar({
+            position: { bottom: "50px", left: "10px" }, // 控制条位置
+            visible: true, // 是否显示
+            Locate: true, // 定位按钮
+            Zoom: true, // 缩放按钮
+            Scale: true, // 比例尺
+          }
+        ));
+
+        // 地图点击事件
+        map.value.on("click", handleMapClick);
+
+        // 地图移动结束事件
+        map.value.on("moveend", () => {
+          const center = map.value.getCenter();
+          const zoom = map.value.getZoom();
+          store.dispatch("ui/setMapState", {
+            center: [center.lat, center.lng],
+            zoom: zoom,
+          });
+        });
+
+        // 添加现有店铺标记
+        addShopMarkers();
+      } catch (error) {
+        console.error('Failed to initialize map:', error);
+        ElMessage.error('地图初始化失败，请检查网络连接或API密钥配置');
+      }
     };
 
     // 处理地图点击
@@ -252,11 +265,19 @@ export default {
     };
 
     // 定位到用户位置
-    const centerToUserLocation = () => {
+    const centerToUserLocation = async () => {
       if (!map.value) return;
 
-      // 使用高德地图的定位插件
-      window.AMap.plugin("AMap.Geolocation", () => {
+      try {
+        // 确保AMap已加载
+        await amapLoader.loadAMap();
+
+        if (!window.AMap) {
+          throw new Error('AMap not available');
+        }
+
+        // 使用高德地图的定位插件
+        window.AMap.plugin("AMap.Geolocation", () => {
         const geolocation = new window.AMap.Geolocation({
           enableHighAccuracy: true, // 是否使用高精度定位
           timeout: 10000, // 超时时间
@@ -292,7 +313,11 @@ export default {
         });
 
         map.value.addControl(geolocation);
-      });
+        });
+      } catch (error) {
+        console.error('Failed to access geolocation:', error);
+        ElMessage.error('定位功能初始化失败');
+      }
     };
 
     // 监听店铺变化
@@ -307,8 +332,16 @@ export default {
     );
 
     // 全局函数，供弹窗按钮调用
-    window.navigationToShop = (lng, lat) => {
-      window.AMap.plugin("AMap.Geolocation", () => {
+    window.navigationToShop = async (lng, lat) => {
+      try {
+        // 确保AMap已加载
+        await amapLoader.loadAMap();
+
+        if (!window.AMap) {
+          throw new Error('AMap not available');
+        }
+
+        window.AMap.plugin("AMap.Geolocation", () => {
         const geolocation = new window.AMap.Geolocation({
           enableHighAccuracy: true, // 是否使用高精度定位
           timeout: 10000, // 超时时间
@@ -335,7 +368,11 @@ export default {
             ElMessage.error("定位失败: " + (result.message || "未知错误"));
           }
         });
-      });
+        });
+      } catch (error) {
+        console.error('Failed to access navigation:', error);
+        ElMessage.error('导航功能初始化失败');
+      }
     };
     
     // 添加事件委托处理编辑和删除

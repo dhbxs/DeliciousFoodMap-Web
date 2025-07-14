@@ -1,0 +1,4 @@
+{
+  "APP_AMAP_KEY": "${APP_AMAP_KEY}",
+  "APP_BACKEND_URL": "${APP_BACKEND_URL}"
+}
