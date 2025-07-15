@@ -148,7 +148,7 @@ export default {
       nickname: '',
       email: '',
       emailPrefix: '',
-      emailSuffix: 'gmail.com',
+      emailSuffix: '',
       password: '',
       verifyCode: '',
       agreeToTerms: false
@@ -285,7 +285,8 @@ export default {
             nickName: form.nickname,
             email: fullEmail,
             password: form.password,
-            verifyCode: form.verifyCode
+            verifyCode: form.verifyCode,
+            captchaId: captchaId.value
           }
           
           try {
@@ -295,10 +296,13 @@ export default {
               // 注册成功后切换到登录状态
               isRegister.value = false
               // 清空表单，但保留邮箱信息用于登录
-              form.email = `${form.emailPrefix}@${form.emailSuffix}`
-              form.password = ''
+              form.email = `${form.emailPrefix}${form.emailSuffix}`
+              form.password = form.password
               form.emailPrefix = ''
-              form.emailSuffix = 'gmail.com'
+              form.emailSuffix = ''
+              // 请求一次验证码，用于登录
+              refreshCaptcha()
+              form.verifyCode = ''
             } else {
               ElMessage.error(res.message || '注册失败，请稍后重试')
             }
