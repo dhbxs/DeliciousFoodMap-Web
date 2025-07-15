@@ -32,9 +32,8 @@ export function logout() {
 // 获取验证码
 export function getCode() {
   return request({
-    url: '/captcha/getCaptcha.png',
-    method: 'get',
-    responseType: 'blob', // 指定响应类型为blob，用于处理图片流
+    url: '/captcha/getCaptcha',
+    method: 'post',
     requireAuth: false
   })
 }

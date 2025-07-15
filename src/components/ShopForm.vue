@@ -298,6 +298,7 @@ export default {
   width: 28px;
   height: 28px;
   margin: 3px 0 3px 0;
+  border-radius: 50%;
 }
 
 .dialog-footer :deep(.el-button) {

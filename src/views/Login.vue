@@ -133,6 +133,11 @@ export default {
     const showPassword = ref(false)
     const loading = ref(false)
     const isRegister = ref(false)
+
+    // 验证码相关
+    const captchaId = ref('')
+    const captchaUrl = ref('')
+    const captchaLoading = ref(false)
     
     // 密码显示/隐藏切换（使用节流避免频繁切换）
     const togglePasswordVisibility = throttle(() => {
@@ -149,26 +154,18 @@ export default {
       agreeToTerms: false
     })
     
-    // 验证码相关
-    const captchaUrl = ref('')
-    const captchaLoading = ref(false)
-    
     // 获取验证码（原始函数）
     const _refreshCaptcha = async () => {
       try {
         captchaLoading.value = true
-        const res = await getCode()
-        // 处理图片流数据
-        if (res instanceof Blob) {
-          // 释放之前的URL对象，避免内存泄漏
-          if (captchaUrl.value && captchaUrl.value.startsWith('blob:')) {
-            URL.revokeObjectURL(captchaUrl.value)
+        getCode().then(res => {
+          if (res.code === "200") {
+            captchaId.value = res.data.captchaId;
+            captchaUrl.value = res.data.captchaImageBase64;
+          } else {
+            ElMessage.warning('获取验证码失败，请重试')
           }
-          // 创建新的URL对象
-          captchaUrl.value = URL.createObjectURL(res)
-        } else {
-          ElMessage.warning('获取验证码失败，请重试')
-        }
+        });
       } catch (err) {
         console.error('获取验证码错误:', err)
         ElMessage.error('获取验证码失败，请检查网络连接')
@@ -312,6 +309,7 @@ export default {
         } else {
           // 登录请求
           const loginData = {
+            captchaId: captchaId.value,
             email: form.email,
             password: form.password,
             verifyCode: form.verifyCode

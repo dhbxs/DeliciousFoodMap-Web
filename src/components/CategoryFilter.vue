@@ -2,10 +2,10 @@
   <div class="category-filter">
     <div class="filter-header">
       <div class="filter-actions">
-        <el-button size="medium" @click="clearFilters" :disabled="selectedCategories.length === 0">
+        <el-button size="default" @click="clearFilters" :disabled="selectedCategories.length === 0">
           清空
         </el-button>
-        <el-button size="medium" type="primary" @click="selectAll"
+        <el-button size="default" type="primary" @click="selectAll"
           :disabled="selectedCategories.length === categories.length">
           全选
         </el-button>

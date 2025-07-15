@@ -15,37 +15,39 @@
         :rules="rules"
         @submit.prevent="handleAddCategory"
       >
-        <div class="form-row" :class="{ 'mobile-form': isMobile }">
-          <el-form-item prop="name" class="form-item-name">
-            <el-input
-              v-model="form.name"
-              placeholder="分类名称"
-            />
-          </el-form-item>
-          
-          <el-form-item prop="icon" class="form-item-icon">
-            <el-select
-              v-model="form.icon"
-              placeholder="请选择图标"
-            >
-              <el-option
-                v-for="icon in iconOptions"
-                :key="icon"
-                :label="icon"
-                :value="icon"
+        <div class="form-row">
+          <div class="form-row-1">
+            <div class="form-item-name">
+              <el-input
+                v-model="form.name"
+                placeholder="分类名称"
+              />
+            </div>
+            
+            <div class="form-item-icon">
+              <el-select
+                v-model="form.icon"
+                placeholder="请选择图标"
               >
-                <svg class="icon" aria-hidden="true" style="font-size: 30px;">
-                  <use :xlink:href="icon" />
-                </svg>
-              </el-option>
-            </el-select>
-          </el-form-item>
-          
-          <div class="color-and-btn-row">
-            <el-form-item prop="color" class="form-item-color">
+                <el-option
+                  v-for="icon in iconOptions"
+                  :key="icon"
+                  :label="icon"
+                  :value="icon"
+                >
+                  <svg class="icon" aria-hidden="true" style="font-size: 30px;">
+                    <use :xlink:href="icon" />
+                  </svg>
+                </el-option>
+              </el-select>
+            </div>
+          </div>
+
+            <div class="form-item-color">
               <el-color-picker v-model="form.color" />
-            </el-form-item>
-            <el-form-item class="form-item-button">
+            </div>
+            
+            <div class="form-item-button">
               <el-button
                 type="primary"
                 @click="handleAddCategory"
@@ -53,8 +55,7 @@
               >
                 添加
               </el-button>
-            </el-form-item>
-          </div>
+            </div>
         </div>
       </el-form>
     </div>
@@ -64,12 +65,11 @@
       <h4>现有分类</h4>
       <!-- 增加区域线 -->
       <div class="category-grid-line"></div>
-      <div class="category-grid" :class="{ 'mobile-grid': isMobile }">
+      <div class="category-grid">
         <div
           v-for="category in categories"
           :key="category.id"
           class="category-card"
-          :class="{ 'mobile-card': isMobile }"
         >
           <div class="category-preview">
             <div class="category-icon"
@@ -92,19 +92,19 @@
             <el-button
               size="small"
               type="primary"
+              icon="edit"
               text
               @click="editCategory(category)"
             >
-              <el-icon><Edit /></el-icon>
             </el-button>
             <el-button
               size="small"
               type="danger"
+              icon="delete"
               text
               @click="deleteCategory(category)"
               :disabled="getCategoryShopCount(category.name) > 0"
             >
-              <el-icon><Delete /></el-icon>
             </el-button>
           </div>
         </div>
@@ -116,7 +116,6 @@
       v-model="showEditDialog"
       title="编辑分类"
       width="400px"
-      :class="{ 'mobile-dialog': isMobile }"
       append-to-body
     >
       <el-form
@@ -124,7 +123,6 @@
         :model="editForm"
         :rules="rules"
         label-width="80px"
-        :class="{ 'mobile-edit-form': isMobile }"
       >
         <el-form-item label="名称" prop="name">
           <el-input v-model="editForm.name" />
@@ -171,17 +169,12 @@
 import { ref, computed, onMounted } from "vue";
 import { useStore } from "vuex";
 import { ElMessage, ElMessageBox } from "element-plus";
-import { Edit, Delete } from "@element-plus/icons-vue";
 import categoryService from '@/services/CategoryService';
 import shopService from '@/services/ShopService';
 import { iconList } from '@/consts/icon';
 
 export default {
   name: "CategoryForm",
-  components: {
-    Edit,
-    Delete,
-  },
   
   setup() {
     const store = useStore();
@@ -190,18 +183,11 @@ export default {
     const loading = ref(false);
     const showEditDialog = ref(false);
 
-    // 检测移动端
-    const isMobile = ref(false);
-    
-    const checkMobile = () => {
-      isMobile.value = window.innerWidth <= 768;
-    };
-
     // 表单数据
     const form = ref({
       name: "",
-      icon: "#food-icon-a-001-drink",
-      color: "#409eff",
+      icon: "",
+      color: "",
     });
     
     // 图标选项
@@ -260,8 +246,8 @@ export default {
     const resetForm = () => {
       form.value = {
         name: "",
-        icon: "#food-icon-a-001-drink",
-        color: "#409eff",
+        icon: "",
+        color: "",
       };
 
       if (formRef.value) {
@@ -383,7 +369,6 @@ export default {
       loading,
       showEditDialog,
       iconOptions,
-      isMobile,
       getCategoryShopCount,
       handleAddCategory,
       editCategory,
@@ -434,12 +419,24 @@ export default {
   align-items: flex-end;
 }
 
-.form-row .el-form-item,
-.form-row .el-input,
-.form-row .el-color-picker,
-.form-row .el-select {
-  width: 200px !important;
+.form-row .form-row-1 {
+  width: calc(100% - 108px - 24px);
+}
+
+.form-item-name,
+.form-item-icon {
+  flex: 1;
+}
+
+.form-row .el-select{
+  width: 100%;
   margin-bottom: 0;
+}
+
+.form-row .form-row-1 {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .category-card {
@@ -495,6 +492,10 @@ export default {
   overflow: hidden;
 }
 
+.category-actions .el-button {
+  color: #fff;
+}
+
 @media (max-width: 768px) {
   :deep(.el-dialog) {
     width: 90% !important;
@@ -502,105 +503,85 @@ export default {
     display: flex !important;
     flex-direction: column !important;
   }
+
   :deep(.el-dialog__body) {
     flex: 1 !important;
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
   }
+
   .add-category-form {
     padding: 12px;
     margin-bottom: 20px;
     flex-shrink: 0;
   }
+
   .add-category-form h4,
   .category-management h4 {
     font-size: 15px;
     margin-bottom: 12px;
   }
+
   .form-row {
-    flex-direction: column;
     gap: 16px;
     margin-bottom: 20px;
   }
-  .form-row .el-form-item,
-  .form-row .el-input,
-  .form-row .el-color-picker,
-  .form-row .el-select {
-    width: 100% !important;
-  }
-  .form-row .el-input,
-  .form-row .el-select {
-    height: 44px;
-  }
-  .form-row .el-color-picker {
-    height: 44px;
-    width: 44px !important;
-  }
+
+
   .form-row .el-button {
     width: 100%;
-    height: 44px;
     font-size: 16px;
   }
+
   .category-card {
     flex-direction: column;
     align-items: stretch;
     padding: 16px;
     gap: 12px;
   }
+
   .category-icon {
     width: 48px;
     height: 48px;
   }
+
   .category-name {
     font-size: 16px;
     font-weight: 500;
   }
+
   .category-count {
     font-size: 13px;
   }
+
   .category-actions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
   }
+
   .category-actions .el-button {
     padding: 8px 12px;
     font-size: 14px;
+    color: #fff
   }
+
   .category-grid {
     display: flex;
     flex-direction: column;
     gap: 16px;
     max-height: none;
   }
+
   .category-grid::-webkit-scrollbar {
     width: 6px;
   }
+
   .category-grid::-webkit-scrollbar-thumb {
     background: #d1d1d1;
     border-radius: 3px;
   }
-  :deep(.el-color-picker__trigger) {
-    height: 45px;
-    width: 45px;
-  }
-}
-
-.color-and-btn-row {
-  display: flex;
-  gap: 12px;
-  flex: 1;
-}
-
-.color-and-btn-row .form-item-color {
-  width: 120px;
-  min-width: 80px;
-}
-
-.color-and-btn-row .form-item-button {
-  width: 100px;
-  min-width: 80px;
 }
 
 .category-grid-line {
