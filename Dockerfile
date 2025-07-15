@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build
+FROM node:18-alpine AS build-stage
 
 WORKDIR /app
 
@@ -13,8 +13,8 @@ FROM nginx:alpine
 
 RUN rm -rf /usr/share/nginx/html/*
 
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY --from=build /app/public/config.json.template /usr/share/nginx/html/config.json.template
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY --from=build-stage /app/public/config.json.template /usr/share/nginx/html/config.json.template
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
