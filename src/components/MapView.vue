@@ -235,19 +235,19 @@ export default {
           closeWhenClickMap: true,
         });
 
+        infoWindow.on('open', function() {
+          // 先解绑，防止重复绑定
+          document.querySelectorAll('.amap-info-window').forEach(el => {
+            el.removeEventListener('click', handleInfoWindowClick);
+            el.addEventListener('click', handleInfoWindowClick);
+          });
+        });
+
         // 标记点击事件
         marker.on("click", () => {
           infoWindow.open(map.value, marker.getPosition());
           shopService.selectShop(shop);
           store.dispatch("shops/selectShop", shop.id);
-          
-          // 添加事件监听
-          setTimeout(() => {
-            const infoWindowElement = document.querySelector('.amap-info-window');
-            if (infoWindowElement) {
-              infoWindowElement.addEventListener('click', handleInfoWindowClick);
-            }
-          }, 100);
         });
 
         // 添加标记到地图
@@ -378,6 +378,7 @@ export default {
     // 添加事件委托处理编辑和删除
     const handleInfoWindowClick = (e) => {
       if (e.target.classList.contains('edit-shop-btn')) {
+        console.log("edit-shop-btn");
         const shopId = e.target.dataset.shopId;
         store.dispatch("ui/showShopForm", shopId);
       } else if (e.target.classList.contains('delete-shop-btn')) {
