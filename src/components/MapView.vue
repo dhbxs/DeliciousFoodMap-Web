@@ -63,31 +63,6 @@ export default {
       }
     });
 
-    // 创建自定义标记内容
-    const createCustomMarkerContent = (category) => {
-      const color = category?.categoryColor || "#409eff";
-      const icon = category?.categoryIcon || "#food-icon-a-001-drink";
-
-      return `
-        <div style="
-          background-color: ${color};
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-          cursor: pointer;
-        ">
-          <svg class="icon" aria-hidden="true" style="font-size: 16px; color: white;">
-            <use xlink:href="${icon}"></use>
-          </svg>
-        </div>
-      `;
-    };
 
     // 初始化地图
     const initMap = async () => {
@@ -261,11 +236,13 @@ export default {
             let marker = getMarkerFromPool();
             if (!marker) {
               marker = new window.AMap.Marker({
+                icon:"/burger.png",
                 offset: new window.AMap.Pixel(-15, -15),
+                imageSize: new  window.AMap.Size(10, 10)
               });
             }
             marker.setPosition([lng, lat]);
-            marker.setContent(createCustomMarkerContent(shop));
+          
             marker.off("click");
             marker.on("click", () => {
               const infoWindow = getInfoWindow(shop);
@@ -306,18 +283,7 @@ export default {
               maxZoom: 15,
               averageCenter: true,
               styles: [
-                {
-                  url:
-                    "data:image/svg+xml;charset=utf-8," +
-                    encodeURIComponent(
-                      '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">' +
-                        '<circle cx="20" cy="20" r="18" fill="#409eff" stroke="#fff" stroke-width="2"/>' +
-                        '<text x="20" y="26" font-family="Arial" font-size="12" font-weight="bold" text-anchor="middle" fill="#fff">TEXT</text>' +
-                        "</svg>"
-                    ),
-                  size: new window.AMap.Size(40, 40),
-                  offset: new window.AMap.Pixel(-20, -20),
-                },
+                
               ],
             }
           );
