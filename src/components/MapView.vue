@@ -4,20 +4,9 @@
 
     <!-- 地图控制按钮 -->
     <div class="map-controls">
-      <el-button
-        type="primary"
-        :icon="Plus"
-        circle
-        @click="toggleAddMode"
-        :class="{ active: addMode }"
-        title="点击地图添加店铺"
-      />
-      <el-button
-        :icon="Location"
-        circle
-        @click="centerToUserLocation"
-        title="定位到当前位置"
-      />
+      <el-button type="primary" :icon="Plus" circle @click="toggleAddMode" :class="{ active: addMode }"
+        title="点击地图添加店铺" />
+      <el-button :icon="Location" circle @click="centerToUserLocation" title="定位到当前位置" />
     </div>
   </div>
 </template>
@@ -231,18 +220,20 @@ export default {
           );
           for (let i = currentIndex; i < endIndex; i++) {
             const shop = validShops[i];
+            const content = `<div class="shop-marker">` + shop.name.substring(0,1) + `</div>`;
             const lng = parseFloat(shop.lng || shop.longitude);
             const lat = parseFloat(shop.lat || shop.latitude);
             let marker = getMarkerFromPool();
+            
             if (!marker) {
               marker = new window.AMap.Marker({
-                icon:"/burger.png",
+                content: content,
                 offset: new window.AMap.Pixel(-15, -15),
-                imageSize: new  window.AMap.Size(10, 10)
+                imageSize: new window.AMap.Size(10, 10)
               });
             }
             marker.setPosition([lng, lat]);
-          
+
             marker.off("click");
             marker.on("click", () => {
               const infoWindow = getInfoWindow(shop);
@@ -283,7 +274,7 @@ export default {
               maxZoom: 15,
               averageCenter: true,
               styles: [
-                
+
               ],
             }
           );
@@ -374,7 +365,7 @@ export default {
     }, 100);
 
     watch(shopIds, (newIds, oldIds) => {
-  
+
 
       if (
         map.value &&
@@ -456,7 +447,7 @@ export default {
               ElMessage.error(error.message || "删除失败");
             }
           })
-          .catch(() => {});
+          .catch(() => { });
       }
     };
 
@@ -563,7 +554,7 @@ export default {
   }
 }
 
-.map-controls .el-button + .el-button {
+.map-controls .el-button+.el-button {
   margin-left: 0;
 }
 
@@ -639,5 +630,17 @@ export default {
 
 .amap-info-content .amap-info-outer {
   padding: 0 0 0 0 !important;
+}
+
+:deep(.shop-marker) {
+  box-sizing: content-box;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 40px;
+  border-radius: 50%;
+  color: #fff;
+  background-color: #6B7FEB;
 }
 </style>
