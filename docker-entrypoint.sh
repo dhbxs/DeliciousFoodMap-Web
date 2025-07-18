@@ -37,7 +37,7 @@ echo "Updated config.json:"
 cat "$CONFIG_FILE"
 
 # Validate that the JSON is still valid after substitution
-if ! cat "$CONFIG_FILE" | grep -q "APP_AMAP_KEY"; then
+if ! cat "$CONFIG_FILE" | grep -q "{APP_AMAP_KEY}"; then
     echo "Config file processed successfully"
 else
     echo "Warning: Some placeholders may not have been replaced"

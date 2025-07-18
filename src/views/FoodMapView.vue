@@ -369,7 +369,7 @@ export default {
   z-index: 100;
   box-shadow: var(--shadow-xl);
   backdrop-filter: blur(20px);
-  will-change: transform;
+  will-change: right;
 }
 
 .sidebar-button:not(.mobile) {
@@ -395,13 +395,7 @@ export default {
 }
 
 .sidebar:not(.mobile).collapsed {
-  width: 0;
-  height: 48px;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  border-radius: var(--radius-full) 0 0 var(--radius-full);
-  box-shadow: var(--shadow-lg);
+  right: -450px;
 }
 
 .sidebar.mobile {
