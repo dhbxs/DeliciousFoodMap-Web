@@ -142,14 +142,14 @@ export default {
         if (newFilter.length === 0) {
           // 如果没有选择分类，则返回所有店铺
           const result = await shopService.getShops(params, true);
-          shopsTotal.value = result.total || 0;
+          shopsTotal.value = result.records?.length || 0;
           shops.value = result.records || [];
           return;
         }
 
         params.categoryId = newFilter.join(",");
         const result = await shopService.getShops(params, true); 
-        shopsTotal.value = result.total || 0;
+        shopsTotal.value = result.records?.length || 0;
         shops.value = result.records || [];
     });
 
@@ -256,7 +256,7 @@ export default {
           pageSize: 100
         }, true); // 强制刷新
 
-        shopsTotal.value = result.total || 0;
+        shopsTotal.value = result.records?.length || 0;
 
         // 同时加载分类数据
         await categoryService.getCategories();

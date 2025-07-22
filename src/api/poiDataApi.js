@@ -7,7 +7,9 @@ import request from "@/utils/request";
  * @returns
  */
 export function getPoiData(data = {}) {
-  data.pageSize = 700;
+  // 不使用分页功能，强制展示所有
+  data.pageNum = null;
+  data.pageSize = null;
   return request({
     method: "POST",
     url: "/poi-data/search",
