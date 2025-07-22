@@ -179,7 +179,8 @@ export default {
             </div>
           </div>
         `,
-        anchor: "bottom-center",
+        anchor: "top-center",
+        offset: new window.AMap.Pixel(-13, 10),
         isCustom: true,
         closeWhenClickMap: true,
       });
@@ -227,13 +228,13 @@ export default {
             
             if (!marker) {
               marker = new window.AMap.Marker({
-                content: content,
+                content: "",
                 offset: new window.AMap.Pixel(-15, -15),
                 imageSize: new window.AMap.Size(10, 10)
               });
             }
             marker.setPosition([lng, lat]);
-
+            marker.setContent(content);
             marker.off("click");
             marker.on("click", () => {
               const infoWindow = getInfoWindow(shop);
@@ -570,6 +571,7 @@ export default {
 
 /* AMAP信息窗体样式 - 简化结构 */
 :deep(.amap-info-window) {
+  position: relative;
   background: var(--el-bg-color);
   border-radius: 12px;
   box-shadow: var(--el-box-shadow-light);
@@ -578,6 +580,17 @@ export default {
   font-family: var(--el-font-family);
   color: var(--el-text-color-primary);
   border: 1px solid var(--el-border-color);
+}
+
+:deep(.amap-info-window::before) {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-color: transparent transparent #fff transparent;
+  border-style: solid;
+  border-width: 0 38px 38px 38px;
 }
 
 :deep(.amap-info-window .shop-title) {
