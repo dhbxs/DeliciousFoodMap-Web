@@ -1,4 +1,13 @@
 {
   "APP_AMAP_KEY": "${APP_AMAP_KEY}",
-  "APP_BACKEND_URL": "${APP_BACKEND_URL}"
+  "APP_AMAP_SECRET": "${APP_AMAP_SECRET}",
+  "APP_BACKEND_URL": "${APP_BACKEND_URL}",
+  "APP_AMAP_VERSION": "2.0",
+  "APP_AMAP_PLUGINS": [
+    "AMap.Scale",
+    "AMap.ToolBar",
+    "AMap.ControlBar",
+    "AMap.Geolocation",
+    "AMap.MarkerClusterer"
+  ]
 }

@@ -4,9 +4,20 @@
 
     <!-- 地图控制按钮 -->
     <div class="map-controls">
-      <el-button type="primary" :icon="Plus" circle @click="toggleAddMode" :class="{ active: addMode }"
-        title="点击地图添加店铺" />
-      <el-button :icon="Location" circle @click="centerToUserLocation" title="定位到当前位置" />
+      <el-button
+        type="primary"
+        :icon="Plus"
+        circle
+        @click="toggleAddMode"
+        :class="{ active: addMode }"
+        title="点击地图添加店铺"
+      />
+      <el-button
+        :icon="Location"
+        circle
+        @click="centerToUserLocation"
+        title="定位到当前位置"
+      />
     </div>
   </div>
 </template>
@@ -22,7 +33,6 @@ import amapLoader from "@/utils/amapLoader";
 
 export default {
   name: "MapView",
-  components: {},
 
   setup() {
     const store = useStore();
@@ -31,6 +41,9 @@ export default {
     const markers = ref(new Map());
     const markerCluster = ref(null);
     const addMode = ref(false);
+
+    // 地图实例引用
+    const AMapInstance = ref(null);
 
     const markerPool = [];
     const infoWindowCache = new Map();
@@ -52,37 +65,58 @@ export default {
       }
     });
 
-
     // 初始化地图
     const initMap = async () => {
       if (!mapContainer.value) return;
 
       try {
-        // 动态加载AMap脚本
-        await amapLoader.loadAMap();
+        // 使用升级后的官方loader加载地图
+        AMapInstance.value = await amapLoader.loadAMap({
+          // 可以在这里传入额外的配置
+          plugins: [
+            "AMap.Scale",
+            "AMap.ToolBar",
+            "AMap.Geolocation",
+            "AMap.MarkerCluster",
+          ],
+        });
 
-        if (!window.AMap) {
-          throw new Error("AMap failed to load");
+        if (!AMapInstance.value) {
+          throw new Error("高德地图加载失败");
         }
 
-        // 创建高德地图实例
-        map.value = new window.AMap.Map(mapContainer.value, {
+        // 创建地图实例
+        map.value = new AMapInstance.value.Map(mapContainer.value, {
           center: [mapCenter.value[1], mapCenter.value[0]], // 高德地图使用[lng, lat]格式
           zoom: mapZoom.value,
           mapStyle: "amap://styles/normal", // 标准地图样式
           viewMode: "2D", // 2D视图
           lang: "zh_cn", // 中文
+          zooms: [3, 20], // 2.0版本支持的缩放级别范围
+          showIndoorMap: false, // 不显示室内地图
+          expandZoomRange: true, // 是否支持可以扩展缩放范围
+          dragEnable: true, // 是否可拖拽
+          zoomEnable: true, // 是否可缩放
+          doubleClickZoom: true, // 是否支持双击缩放
+          keyboardEnable: true, // 是否支持键盘操作
+          scrollWheel: true, // 是否支持滚轮缩放
+          touchZoom: true, // 是否支持触摸缩放
+          touchZoomCenter: 1, // 手机端双指缩放的中心
+          showBuildingBlock: true, // 是否显示3D楼块
+          features: ["bg", "point", "road", "building"], // 设置地图显示要素
+          pitch: 0, // 地图俯仰角度，2D模式下为0
+          rotation: 0, // 地图顺时针旋转角度
         });
 
         // 添加地图控件
-        map.value.addControl(new window.AMap.Scale());
+        map.value.addControl(new AMapInstance.value.Scale());
         map.value.addControl(
-          new window.AMap.ToolBar({
+          new AMapInstance.value.ToolBar({
             position: { bottom: "50px", left: "10px" }, // 控制条位置
             visible: true, // 是否显示
-            Locate: true, // 定位按钮
-            Zoom: true, // 缩放按钮
-            Scale: true, // 比例尺
+            locate: true, // 定位按钮
+            zoom: true, // 缩放按钮
+            scale: true, // 比例尺
           })
         );
 
@@ -102,8 +136,10 @@ export default {
         // 添加现有店铺标记
         addShopMarkers();
       } catch (error) {
-        console.error("Failed to initialize map:", error);
-        ElMessage.error("地图初始化失败，请检查网络连接或API密钥配置");
+        console.error("地图初始化失败:", error);
+        ElMessage.error(
+          `地图初始化失败: ${error.message || "请检查网络连接或API密钥配置"}`
+        );
       }
     };
 
@@ -126,12 +162,14 @@ export default {
     const getMarkerFromPool = () => {
       return markerPool.length > 0 ? markerPool.pop() : null;
     };
+
     const recycleMarker = (marker) => {
       if (marker) {
         marker.setMap(null);
         markerPool.push(marker);
       }
     };
+
     const getInfoWindow = (shop) => {
       if (infoWindowCache.has(shop.id)) {
         return infoWindowCache.get(shop.id);
@@ -141,7 +179,7 @@ export default {
       const lat = parseFloat(shop.lat || shop.latitude);
       shop.description = shop.description || "暂无描述";
 
-      const infoWindow = new window.AMap.InfoWindow({
+      const infoWindow = new AMapInstance.value.InfoWindow({
         content: `
           <div class="amap-info-window">
             <h4 class="shop-title">${shop.name}</h4>
@@ -179,10 +217,13 @@ export default {
             </div>
           </div>
         `,
-        anchor: "top-center",
-        offset: new window.AMap.Pixel(-13, 10),
-        isCustom: true,
-        closeWhenClickMap: true,
+        anchor: "bottom-center", // 2.0版本推荐的锚点位置
+        offset: new AMapInstance.value.Pixel(0, -10), // 调整偏移量
+        isCustom: false, // 2.0版本建议使用标准信息窗体
+        closeWhenClickMap: true, // 点击地图时关闭
+        showShadow: true, // 显示阴影
+        autoMove: true, // 是否自动调整窗体到视野内
+        avoid: [20, 20, 20, 20], // 自动避让的边距
       });
 
       infoWindowCache.set(shop.id, infoWindow);
@@ -190,18 +231,25 @@ export default {
     };
 
     const addShopMarkers = () => {
-      if (!map.value) return;
+      if (!map.value || !AMapInstance.value) return;
+
+      console.log("🗺️ AddShopMarkers called");
+      console.log("📊 Shops data:", shops.value);
+      console.log("📈 Shops count:", shops.value?.length || 0);
+
       requestAnimationFrame(() => {
+        // 清理现有的聚合和标记
         if (markerCluster.value) {
-          markerCluster.value.setMarkers([]);
+          markerCluster.value.setMap(null);
+          markerCluster.value = null;
         }
         markers.value.forEach((marker) => recycleMarker(marker));
         markers.value.clear();
-        const markerArray = [];
+        const points = [];
         const validShops = shops.value.filter((shop) => {
           const lng = parseFloat(shop.lng || shop.longitude);
           const lat = parseFloat(shop.lat || shop.latitude);
-          return (
+          const isValid =
             !isNaN(lng) &&
             !isNaN(lat) &&
             lng !== 0 &&
@@ -209,9 +257,20 @@ export default {
             lng >= 73 &&
             lng <= 135 &&
             lat >= 3 &&
-            lat <= 54
-          );
+            lat <= 54;
+
+          if (!isValid) {
+            console.log("❌ Invalid shop coordinates:", shop.name, {
+              lng,
+              lat,
+            });
+          }
+
+          return isValid;
         });
+
+        console.log("✅ Valid shops count:", validShops.length);
+
         const batchSize = 100;
         let currentIndex = 0;
         const processBatch = () => {
@@ -221,20 +280,35 @@ export default {
           );
           for (let i = currentIndex; i < endIndex; i++) {
             const shop = validShops[i];
-            const content = `<div class="shop-marker">` + shop.name.substring(0,1) + `</div>`;
             const lng = parseFloat(shop.lng || shop.longitude);
             const lat = parseFloat(shop.lat || shop.latitude);
+
+            // 创建标记用于备用（当聚合不可用时）
+            const content = `<div class="shop-marker">${shop.name.substring(
+              0,
+              1
+            )}</div>`;
             let marker = getMarkerFromPool();
-            
+
             if (!marker) {
-              marker = new window.AMap.Marker({
-                content: "",
-                offset: new window.AMap.Pixel(-15, -15),
-                imageSize: new window.AMap.Size(10, 10)
+              marker = new AMapInstance.value.Marker({
+                content: content,
+                position: [lng, lat],
+                offset: new AMapInstance.value.Pixel(-20, -20),
+                anchor: "center",
+                clickable: true,
+                bubble: true,
+                draggable: false,
+                cursor: "pointer",
+                extData: shop, // 将店铺数据存储到marker中
               });
+            } else {
+              marker.setPosition([lng, lat]);
+              marker.setContent(content);
+              marker.setExtData(shop);
             }
-            marker.setPosition([lng, lat]);
-            marker.setContent(content);
+
+            // 添加点击事件
             marker.off("click");
             marker.on("click", () => {
               const infoWindow = getInfoWindow(shop);
@@ -250,42 +324,114 @@ export default {
                 }
               }, 100);
             });
-            markerArray.push(marker);
+
+            // 创建points数组项，包含位置和店铺信息
+            const point = {
+              lnglat: [lng, lat],
+              shop: shop, // 包含完整的店铺信息
+              marker: marker, // 包含创建的标记
+            };
+            points.push(point);
             markers.value.set(shop.id, marker);
           }
           currentIndex = endIndex;
-          if (currentIndex < validShops.length) {
-            requestAnimationFrame(processBatch);
+
+          // 处理完所有批次后创建聚合
+          if (currentIndex >= validShops.length) {
+            finishMarkerCreation(points);
           } else {
-            finishMarkerCreation(markerArray);
+            requestAnimationFrame(processBatch);
           }
         };
         processBatch();
       });
     };
 
-    const finishMarkerCreation = (markerArray) => {
-      if (window.AMap.MarkerClusterer) {
-        if (!markerCluster.value) {
-          markerCluster.value = new window.AMap.MarkerClusterer(
-            map.value,
-            markerArray,
-            {
-              gridSize: 60,
-              maxZoom: 15,
-              averageCenter: true,
-              styles: [
+    const finishMarkerCreation = (points) => {
+      console.log("📍 Creating markers with points count:", points.length);
 
-              ],
-            }
-          );
-        } else {
-          markerCluster.value.setMarkers(markerArray);
+      // 检查MarkerCluster插件是否可用
+      if (AMapInstance.value && AMapInstance.value.MarkerCluster) {
+        console.log("📍 Using MarkerCluster");
+
+        // 如果已有聚合实例，先销毁
+        if (markerCluster.value) {
+          markerCluster.value.setMap(null);
+          markerCluster.value = null;
         }
+
+        // 创建新的聚合实例
+        markerCluster.value = new AMapInstance.value.MarkerCluster(
+          map.value,
+          points,
+          {
+            gridSize: 60, // 聚合网格大小，像素单位
+            maxZoom: 18, // 最大聚合的地图级别
+            averageCenter: true, // 聚合点的中心是否基于所包含标记的平均中心
+            zoomOnClick: true, // 点击聚合标记时是否自动缩放到合适级别
+            renderClusterMarker: function (context) {
+              // 自定义聚合点标记的渲染
+              const count = context.count;
+              let size = 40;
+              let color = "#409EFF";
+
+              // 根据聚合点包含的标记数量设置不同样式
+              if (count < 10) {
+                size = 40;
+                color = "#409EFF";
+              } else if (count < 100) {
+                size = 50;
+                color = "#E6A23C";
+              } else {
+                size = 60;
+                color = "#F56C6C";
+              }
+
+              const content = `
+                <div style="
+                  width: ${size}px;
+                  height: ${size}px;
+                  background-color: ${color};
+                  border: 2px solid #ffffff;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  font-size: ${size > 50 ? "16px" : "14px"};
+                  font-weight: bold;
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                  cursor: pointer;
+                  transition: transform 0.2s ease-in-out;
+                " onmouseover="this.style.transform='scale(1.1)'" 
+                   onmouseout="this.style.transform='scale(1)'">
+                  ${count}
+                </div>
+              `;
+
+              // 设置聚合点标记内容
+              context.marker.setContent(content);
+              return context.marker;
+            },
+          }
+        );
+
+        console.log(
+          "✅ MarkerCluster created successfully with",
+          points.length,
+          "points"
+        );
       } else {
-        markerArray.forEach((marker) => {
+        // 如果MarkerCluster不可用，直接添加标记到地图
+        console.log(
+          "📍 MarkerCluster not available, adding markers directly to map"
+        );
+
+        // 从存储的markers中获取并添加到地图
+        markers.value.forEach((marker) => {
           map.value.add(marker);
         });
+        console.log("🎉 All markers added directly to map");
       }
     };
 
@@ -299,60 +445,52 @@ export default {
 
     // 定位到用户位置
     const centerToUserLocation = async () => {
-      if (!map.value) return;
+      if (!map.value || !AMapInstance.value) return;
 
       try {
-        // 确保AMap已加载
-        await amapLoader.loadAMap();
-
-        if (!window.AMap) {
-          throw new Error("AMap not available");
-        }
-
-        // 使用高德地图的定位插件
-        window.AMap.plugin("AMap.Geolocation", () => {
-          const geolocation = new window.AMap.Geolocation({
-            enableHighAccuracy: true, // 是否使用高精度定位
-            timeout: 10000, // 超时时间
-            maximumAge: 0, // 定位结果缓存0毫秒
-            convert: true, // 自动偏移坐标
-            showButton: false, // 不显示定位按钮
-            buttonPosition: "LB", // 定位按钮停靠位置
-            showMarker: true, // 定位成功后在定位到的位置显示点标记
-            showCircle: false, // 定位成功后用圆圈表示定位精度范围
-            panToLocation: true, // 定位成功后将定位到的位置作为地图中心点
-            zoomToAccuracy: true, // 定位成功后调整地图视野范围使定位位置及精度范围视野内可见
-          });
-
-          geolocation.getCurrentPosition((status, result) => {
-            if (status === "complete") {
-              const pos = result.position;
-              if (
-                pos &&
-                typeof pos.lng === "number" &&
-                typeof pos.lat === "number"
-              ) {
-                map.value.setCenter([pos.lng, pos.lat]);
-                map.value.setZoom(17);
-                ElMessage.success("定位成功");
-
-                // 更新store中的地图状态
-                store.dispatch("ui/setMapState", {
-                  center: [pos.lat, pos.lng],
-                  zoom: 17,
-                });
-              } else {
-                ElMessage.warning("无法获取有效位置信息");
-              }
-            } else {
-              ElMessage.error("定位失败: " + (result.message || "未知错误"));
-            }
-          });
-
-          map.value.addControl(geolocation);
+        // 在高德地图2.0中，Geolocation插件已预加载，可以直接使用
+        const geolocation = new AMapInstance.value.Geolocation({
+          enableHighAccuracy: true, // 是否使用高精度定位
+          timeout: 10000, // 超时时间
+          maximumAge: 0, // 定位结果缓存0毫秒
+          convert: true, // 自动偏移坐标
+          showButton: false, // 不显示定位按钮
+          buttonPosition: "LB", // 定位按钮停靠位置
+          showMarker: true, // 定位成功后在定位到的位置显示点标记
+          showCircle: false, // 定位成功后用圆圈表示定位精度范围
+          panToLocation: true, // 定位成功后将定位到的位置作为地图中心点
+          zoomToAccuracy: true, // 定位成功后调整地图视野范围使定位位置及精度范围视野内可见
         });
+
+        geolocation.getCurrentPosition((status, result) => {
+          if (status === "complete") {
+            const pos = result.position;
+            if (
+              pos &&
+              typeof pos.lng === "number" &&
+              typeof pos.lat === "number"
+            ) {
+              map.value.setCenter([pos.lng, pos.lat]);
+              map.value.setZoom(17);
+              ElMessage.success("定位成功");
+
+              // 更新store中的地图状态
+              store.dispatch("ui/setMapState", {
+                center: [pos.lat, pos.lng],
+                zoom: 17,
+              });
+            } else {
+              ElMessage.warning("无法获取有效位置信息");
+            }
+          } else {
+            ElMessage.error("定位失败: " + (result.message || "未知错误"));
+          }
+        });
+
+        // 在2.0中直接添加到地图
+        map.value.addControl(geolocation);
       } catch (error) {
-        console.error("Failed to access geolocation:", error);
+        console.error("定位功能初始化失败:", error);
         ElMessage.error("定位功能初始化失败");
       }
     };
@@ -366,8 +504,6 @@ export default {
     }, 100);
 
     watch(shopIds, (newIds, oldIds) => {
-
-
       if (
         map.value &&
         (!oldIds ||
@@ -375,54 +511,48 @@ export default {
           !newIds.every((id, index) => id === oldIds[index]))
       ) {
         debouncedAddShopMarkers();
-      } else {
       }
     });
 
     // 全局函数，供弹窗按钮调用
     window.navigationToShop = async (lng, lat) => {
       try {
-        // 确保AMap已加载
-        await amapLoader.loadAMap();
-
-        if (!window.AMap) {
-          throw new Error("AMap not available");
+        if (!AMapInstance.value) {
+          throw new Error("地图实例未加载");
         }
 
-        window.AMap.plugin("AMap.Geolocation", () => {
-          const geolocation = new window.AMap.Geolocation({
-            enableHighAccuracy: true, // 是否使用高精度定位
-            timeout: 10000, // 超时时间
-            maximumAge: 0, // 定位结果缓存0毫秒
-            convert: true,
-            panToLocation: false, // 定位成功后将定位到的位置作为地图中心点
-          });
+        // 在高德地图2.0中，Geolocation插件已预加载，可以直接使用
+        const geolocation = new AMapInstance.value.Geolocation({
+          enableHighAccuracy: true, // 是否使用高精度定位
+          timeout: 10000, // 超时时间
+          maximumAge: 0, // 定位结果缓存0毫秒
+          convert: true,
+          panToLocation: false, // 定位成功后将定位到的位置作为地图中心点
+        });
 
-          geolocation.getCurrentPosition((status, result) => {
-            if (status === "complete") {
-              const pos = result.position;
-              if (
-                pos &&
-                typeof pos.lng === "number" &&
-                typeof pos.lat === "number"
-              ) {
-                // 更新store中的地图状态,从mutitions中的方法中更新
-                store.commit("ui/SET_MAP_CENTER", [pos.lat, pos.lng]);
+        geolocation.getCurrentPosition((status, result) => {
+          if (status === "complete") {
+            const pos = result.position;
+            if (
+              pos &&
+              typeof pos.lng === "number" &&
+              typeof pos.lat === "number"
+            ) {
+              // 更新store中的地图状态,从mutitions中的方法中更新
+              store.commit("ui/SET_MAP_CENTER", [pos.lat, pos.lng]);
 
-                let url = `//uri.amap.com/navigation?from=${pos.lng},${pos.lat}&to=${lng},${lat}&mode=car&policy=0&callnative=1`;
-                // window.open("//uri.amap.com/navigation?from=116.478346,39.997361,startpoint&to=116.3246,39.966577,endpoint&via=116.402796,39.936915,midwaypoint&mode=car&policy=1&src=mypage&callnative=0", "_blank")
-                console.log("url:", url);
-                window.open(url, "_blank");
-              } else {
-                ElMessage.warning("无法获取有效位置信息");
-              }
+              let url = `//uri.amap.com/navigation?from=${pos.lng},${pos.lat}&to=${lng},${lat}&mode=car&policy=0&callnative=1`;
+              console.log("url:", url);
+              window.open(url, "_blank");
             } else {
-              ElMessage.error("定位失败: " + (result.message || "未知错误"));
+              ElMessage.warning("无法获取有效位置信息");
             }
-          });
+          } else {
+            ElMessage.error("定位失败: " + (result.message || "未知错误"));
+          }
         });
       } catch (error) {
-        console.error("Failed to access navigation:", error);
+        console.error("导航功能初始化失败:", error);
         ElMessage.error("导航功能初始化失败");
       }
     };
@@ -448,7 +578,7 @@ export default {
               ElMessage.error(error.message || "删除失败");
             }
           })
-          .catch(() => { });
+          .catch(() => {});
       }
     };
 
@@ -480,8 +610,10 @@ export default {
     onUnmounted(() => {
       debouncedAddShopMarkers.cancel();
 
+      // 清理聚合实例
       if (markerCluster.value) {
-        markerCluster.value.setMarkers([]);
+        markerCluster.value.setMap(null);
+        markerCluster.value = null;
       }
       markerPool.forEach((marker) => {
         if (marker) {
@@ -532,14 +664,54 @@ export default {
   width: 100%;
 }
 
-.map-controls {
+.debug-panel {
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-family: var(--el-font-family);
+  color: var(--el-text-color-primary);
+  border: 1px solid var(--el-border-color);
+}
+
+.debug-panel h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--el-text-color-primary);
+}
+
+.debug-panel p {
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+}
+
+.shops-preview h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: var(--el-text-color-primary);
+}
+
+.shop-item {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: var(--el-fill-color-light);
+  border-radius: 6px;
+  border: 1px solid var(--el-border-color-light);
+}
+
+.shop-item strong {
+  font-size: 15px;
+  color: var(--el-text-color-primary);
+}
+
+.shop-item small {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
 }
 
 /* 编写一个适配移动端的 .map-controls */
@@ -555,7 +727,7 @@ export default {
   }
 }
 
-.map-controls .el-button+.el-button {
+.map-controls .el-button + .el-button {
   margin-left: 0;
 }
 
@@ -654,6 +826,6 @@ export default {
   line-height: 40px;
   border-radius: 50%;
   color: #fff;
-  background-color: #6B7FEB;
+  background-color: #6b7feb;
 }
 </style>
