@@ -6,14 +6,14 @@
     <div class="map-controls">
       <el-button
         type="primary"
-        :icon="Plus"
+        icon="plus"
         circle
         @click="toggleAddMode"
         :class="{ active: addMode }"
         title="点击地图添加店铺"
       />
       <el-button
-        :icon="Location"
+        icon="location"
         circle
         @click="centerToUserLocation"
         title="定位到当前位置"
@@ -25,7 +25,6 @@
 <script>
 import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useStore } from "vuex";
-import { Plus, Location } from "@element-plus/icons-vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { debounce } from "lodash";
 import shopService from "@/services/ShopService";
@@ -89,20 +88,9 @@ export default {
         map.value = new AMapInstance.value.Map(mapContainer.value, {
           center: [mapCenter.value[1], mapCenter.value[0]], // 高德地图使用[lng, lat]格式
           zoom: mapZoom.value,
-          mapStyle: "amap://styles/normal", // 标准地图样式
-          viewMode: "2D", // 2D视图
-          lang: "zh_cn", // 中文
           zooms: [3, 20], // 2.0版本支持的缩放级别范围
-          showIndoorMap: false, // 不显示室内地图
           expandZoomRange: true, // 是否支持可以扩展缩放范围
-          dragEnable: true, // 是否可拖拽
-          zoomEnable: true, // 是否可缩放
-          doubleClickZoom: true, // 是否支持双击缩放
-          keyboardEnable: true, // 是否支持键盘操作
-          scrollWheel: true, // 是否支持滚轮缩放
-          touchZoom: true, // 是否支持触摸缩放
           touchZoomCenter: 1, // 手机端双指缩放的中心
-          showBuildingBlock: true, // 是否显示3D楼块
           features: ["bg", "point", "road", "building"], // 设置地图显示要素
           pitch: 0, // 地图俯仰角度，2D模式下为0
           rotation: 0, // 地图顺时针旋转角度
@@ -232,11 +220,6 @@ export default {
 
     const addShopMarkers = () => {
       if (!map.value || !AMapInstance.value) return;
-
-      console.log("🗺️ AddShopMarkers called");
-      console.log("📊 Shops data:", shops.value);
-      console.log("📈 Shops count:", shops.value?.length || 0);
-
       requestAnimationFrame(() => {
         // 清理现有的聚合和标记
         if (markerCluster.value) {
@@ -258,18 +241,8 @@ export default {
             lng <= 135 &&
             lat >= 3 &&
             lat <= 54;
-
-          if (!isValid) {
-            console.log("❌ Invalid shop coordinates:", shop.name, {
-              lng,
-              lat,
-            });
-          }
-
           return isValid;
         });
-
-        console.log("✅ Valid shops count:", validShops.length);
 
         const batchSize = 100;
         let currentIndex = 0;
@@ -411,6 +384,15 @@ export default {
 
               // 设置聚合点标记内容
               context.marker.setContent(content);
+              return context.marker;
+            },
+            renderMarker: function (context) {
+              const marker = context.marker;
+              const shop = marker.getExtData(); // 获取存储的shop数据
+              const shopName = shop ? shop.name : 'N/A';
+              const firstChar = shopName ? shopName.substring(0, 1) : '?';
+              marker.setContent(`<div class="shop-marker">${firstChar}</div>`);
+              context.marker = marker;
               return context.marker;
             },
           }
@@ -559,6 +541,7 @@ export default {
 
     // 添加事件委托处理编辑和删除
     const handleInfoWindowClick = (e) => {
+      console.log("marker click");
       if (e.target.classList.contains("edit-shop-btn")) {
         const shopId = e.target.dataset.shopId;
         store.dispatch("ui/showShopForm", shopId);
@@ -644,9 +627,7 @@ export default {
       mapContainer,
       addMode,
       toggleAddMode,
-      centerToUserLocation,
-      Plus,
-      Location,
+      centerToUserLocation
     };
   },
 };
@@ -662,56 +643,6 @@ export default {
 .map {
   height: 100%;
   width: 100%;
-}
-
-.debug-panel {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  font-family: var(--el-font-family);
-  color: var(--el-text-color-primary);
-  border: 1px solid var(--el-border-color);
-}
-
-.debug-panel h4 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: var(--el-text-color-primary);
-}
-
-.debug-panel p {
-  margin-bottom: 5px;
-  font-size: 14px;
-  color: var(--el-text-color-secondary);
-}
-
-.shops-preview h5 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: var(--el-text-color-primary);
-}
-
-.shop-item {
-  margin-bottom: 8px;
-  padding: 8px;
-  background-color: var(--el-fill-color-light);
-  border-radius: 6px;
-  border: 1px solid var(--el-border-color-light);
-}
-
-.shop-item strong {
-  font-size: 15px;
-  color: var(--el-text-color-primary);
-}
-
-.shop-item small {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
 }
 
 /* 编写一个适配移动端的 .map-controls */
