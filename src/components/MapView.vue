@@ -388,7 +388,7 @@ export default {
             },
             renderMarker: function (context) {
               const marker = context.marker;
-              const shop = marker.getExtData(); // 获取存储的shop数据
+              const shop = context.data[0].shop;
               const shopName = shop ? shop.name : 'N/A';
               const firstChar = shopName ? shopName.substring(0, 1) : '?';
               marker.setContent(`<div class="shop-marker">${firstChar}</div>`);
