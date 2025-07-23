@@ -42,7 +42,10 @@
       <div class="sidebar" :class="{
         collapsed: sidebarCollapsed,
         mobile: isMobile,
-      }">
+      }"
+      @touchstart="isMobile ? handleTouchStart : null"
+      @touchmove="isMobile ? handleTouchMove : null" 
+      @touchend="isMobile ? handleTouchEnd : null">
         <!-- 侧边栏展开折叠按钮 -->
         <el-button class="sidebar-button" :icon="sidebarCollapsed ? ArrowLeft : ArrowRight" @click="toggleSidebar" text />
         <!-- 桌面端头部 -->
@@ -75,6 +78,11 @@
           </div>
         </div>
 
+        <!-- 移动端拖拽指示器 -->
+        <div v-if="isMobile" class="mobile-drag-indicator" @click="closeSidebar">
+          <div class="drag-handle"></div>
+        </div>
+
         <!-- 侧边栏内容 -->
         <div class="sidebar-content" v-show="!sidebarCollapsed || isMobile">
 
@@ -104,6 +112,21 @@
           <GlobalSearch />
         </div>
         <MapView />
+        
+        <!-- 移动端底部触发条 -->
+        <div v-if="isMobile" class="mobile-bottom-trigger" 
+             @click="toggleSidebar"
+             @touchstart="handleBottomTriggerTouchStart"
+             @touchmove="handleBottomTriggerTouchMove"
+             @touchend="handleBottomTriggerTouchEnd">
+          <div class="trigger-handle"></div>
+          <div class="trigger-content">
+            <span class="trigger-text">{{ sidebarCollapsed ? '上拉查看店铺列表' : '下拉收起' }}</span>
+            <el-icon class="trigger-icon" :class="{ 'rotated': !sidebarCollapsed }">
+              <ArrowUp />
+            </el-icon>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -112,7 +135,7 @@
     <CategoryForm />
 
     <!-- 移动端遮罩 -->
-    <!-- <div v-if="isMobile && !sidebarCollapsed" class="mobile-overlay" @click="closeSidebar"></div> -->
+    <div v-if="isMobile && !sidebarCollapsed" class="mobile-overlay" @click="closeSidebar"></div>
   </div>
 </template>
 
@@ -192,6 +215,65 @@ export default {
       }
     };
 
+    // 移动端触摸手势处理
+    let touchStartY = 0;
+    let touchEndY = 0;
+    
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+    };
+    
+    const handleTouchMove = (e) => {
+      // 防止在侧边栏打开时滚动背景页面
+      if (!sidebarCollapsed.value && isMobile.value) {
+        e.preventDefault();
+      }
+    };
+    
+    const handleTouchEnd = (e) => {
+      touchEndY = e.changedTouches[0].clientY;
+      
+      // 如果是向下滑动超过50px，则关闭侧边栏
+      if (touchStartY - touchEndY < -50 && !sidebarCollapsed.value && isMobile.value) {
+        closeSidebar();
+      }
+    };
+
+    // 移动端底部触发条触摸手势处理
+    let bottomTriggerTouchStartY = 0;
+    let bottomTriggerTouchEndY = 0;
+    const swipeThreshold = 30; // 滑动阈值
+
+    const handleBottomTriggerTouchStart = (e) => {
+      bottomTriggerTouchStartY = e.touches[0].clientY;
+    };
+
+    const handleBottomTriggerTouchMove = (e) => {
+      // 阻止默认滚动行为
+      e.preventDefault();
+    };
+
+    const handleBottomTriggerTouchEnd = (e) => {
+      bottomTriggerTouchEndY = e.changedTouches[0].clientY;
+      const swipeDistance = bottomTriggerTouchStartY - bottomTriggerTouchEndY;
+      
+      // 向上滑动打开侧边栏
+      if (swipeDistance > swipeThreshold && sidebarCollapsed.value && isMobile.value) {
+        // 提供触觉反馈（如果支持）
+        if (navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+        toggleSidebar();
+      }
+      // 向下滑动关闭侧边栏（但这个功能主要在侧边栏本身处理）
+      else if (swipeDistance < -swipeThreshold && !sidebarCollapsed.value && isMobile.value) {
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+        closeSidebar();
+      }
+    };
+
     // 添加店铺
     const addShop = () => {
       store.dispatch("ui/showShopForm");
@@ -268,6 +350,12 @@ export default {
       userAvatar,
       userInitials,
       handleLogout,
+      handleTouchStart,
+      handleTouchMove,
+      handleTouchEnd,
+      handleBottomTriggerTouchStart,
+      handleBottomTriggerTouchMove,
+      handleBottomTriggerTouchEnd,
       Menu,
       Plus,
       ArrowLeft,
@@ -406,22 +494,50 @@ export default {
 
 .sidebar.mobile {
   position: fixed;
-  top: 60px; /* 在移动端顶部工具栏下方 */
+  bottom: 0;
   left: 0;
-  right: auto;
-  height: calc(100vh - 60px);
-  width: 320px;
+  right: 0;
+  height: 33.33vh; /* 占据屏幕高度的1/3 */
   background: var(--bg-primary);
-  box-shadow: var(--shadow-2xl);
-  transform: translateX(-100%);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(100%);
   z-index: 1001;
-  border-radius: 0 var(--radius-2xl) var(--radius-2xl) 0;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   transition: transform var(--transition-normal);
   overflow-y: auto;
+  backdrop-filter: blur(20px);
 }
 
 .sidebar.mobile:not(.collapsed) {
-  transform: translateX(0);
+  transform: translateY(0);
+}
+
+/* 移动端拖拽指示器 */
+.mobile-drag-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 24px;
+  padding: var(--spacing-xs) 0;
+  cursor: pointer;
+  background: var(--bg-primary);
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.drag-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.mobile-drag-indicator:hover .drag-handle {
+  background: var(--text-secondary);
+  width: 50px;
 }
 
 .sidebar-header {
@@ -633,17 +749,111 @@ export default {
   transform: none;
 }
 
-/* .mobile-overlay {
+/* 当移动端侧边栏打开时，调整搜索栏位置 */
+.main-layout.mobile .search-overlay.mobile-search {
+  transition: bottom var(--transition-normal);
+}
+
+.main-layout.mobile:has(.sidebar.mobile:not(.collapsed)) .search-overlay.mobile-search {
+  bottom: calc(33.33vh + var(--spacing-md));
+}
+
+/* 移动端底部触发条 */
+.mobile-bottom-trigger {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px; /* 触发条高度 */
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid var(--gray-200);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  z-index: 10;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.mobile-bottom-trigger:active {
+  background: rgba(107, 127, 235, 0.1);
+  transform: translateY(-1px);
+}
+
+/* 当侧边栏打开时隐藏底部触发条 */
+.main-layout.mobile:has(.sidebar.mobile:not(.collapsed)) .mobile-bottom-trigger {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.trigger-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.2);
+  }
+}
+
+.trigger-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.trigger-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.trigger-icon {
+  font-size: 16px;
+  color: var(--text-secondary);
+  transition: transform var(--transition-fast);
+}
+
+.trigger-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.mobile-bottom-trigger:active .trigger-text,
+.mobile-bottom-trigger:active .trigger-icon {
+  color: var(--primary-color);
+}
+
+/* 移动端遮罩 */
+.mobile-overlay {
   position: fixed;
-  top: 60px; 
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4);
+  /* 模糊背景 */
+  /* backdrop-filter: blur(1px); */
   z-index: 1000;
   animation: fadeIn var(--transition-fast) ease-out;
-} */
+}
 
 /* 响应式设计 */
 @media (max-width: 768px) {
@@ -675,14 +885,16 @@ export default {
   }
 
   .sidebar.mobile {
-    top: 56px;
-    height: calc(100vh - 56px);
-    width: 300px;
+    height: 35vh; /* 在小屏幕上稍微增加高度 */
   }
 
-  /* .mobile-overlay {
-    top: 56px;
-  } */
+  .mobile-bottom-trigger {
+    height: 50px;
+  }
+
+  .trigger-text {
+    font-size: 11px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -705,15 +917,17 @@ export default {
   }
 
   .sidebar.mobile {
-    top: 52px;
-    height: calc(100vh - 52px);
-    width: 100%;
-    border-radius: 0;
+    height: 40vh; /* 在最小屏幕上增加更多高度以便操作 */
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
 
-  /* .mobile-overlay {
-    display: none;
-  } */
+  .mobile-bottom-trigger {
+    height: 45px;
+  }
+
+  .trigger-text {
+    font-size: 10px;
+  }
 
   .sidebar-header {
     padding: var(--spacing-md);
@@ -757,6 +971,10 @@ export default {
   transition: all var(--transition-normal);
 }
 
+.sidebar.mobile {
+  transition: transform var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* 进入动画 */
 .food-map-view {
   animation: fadeIn var(--transition-slow) ease-out;
@@ -765,6 +983,32 @@ export default {
 /* 悬浮效果 */
 .sidebar:not(.mobile):not(.collapsed):hover {
   box-shadow: var(--shadow-2xl);
+}
+
+/* 移动端侧边栏弹出动画 */
+@keyframes slideUpIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.sidebar.mobile:not(.collapsed) {
+  animation: slideUpIn var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 遮罩淡入动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* 加载状态 */
